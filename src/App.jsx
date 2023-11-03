@@ -1,10 +1,16 @@
-import GeoloContainer from "./components/GeoloContainer"
+//import GeoloContainer from "./components/GeoloContainer"
+
+import SidebarWithHeader from "./components/SidebarWithHeader"
+
+//import LoginContainer from "./components/LoginContainer"
 
 const App = () => {
 
   return (
     <>
-      <GeoloContainer/>
+      {/* <GeoloContainer/> */}
+      {/* <LoginContainer/> */}
+      <SidebarWithHeader/>
     </>
   )
 }

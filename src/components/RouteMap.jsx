@@ -28,8 +28,8 @@ const RouteMap = ({ locationUser, closestDirection, setDistance }) => {
         },
         {
           latLng: L.latLng(
-            closestDirection[0].latitude,
-            closestDirection[0].longitude
+            closestDirection[0].Coordenadas.Latitud,
+            closestDirection[0].Coordenadas.Longitud
           ),
           icon: L.icon({
             iconUrl: endIcon,
