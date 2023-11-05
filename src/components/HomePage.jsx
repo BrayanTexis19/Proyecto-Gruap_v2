@@ -12,7 +12,7 @@ const HomePage = () => {
   );
   return (
     <Box w="full" minH="80vh" bg="white">
-      <Heading p="2">Menu de opciones:</Heading>
+      <Heading size="lg" fontWeight="medium" p="2">Menu de opciones:</Heading>
       <Box display="flex" p="2" gap="3" flexWrap="wrap">
         {userData.Rol === "Admin" ? (
           <>

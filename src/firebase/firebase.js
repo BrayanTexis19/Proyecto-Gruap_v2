@@ -11,6 +11,7 @@ import {
   addDoc,
   setDoc,
   deleteDoc,
+  getDoc
 
 } from "firebase/firestore";
 
@@ -95,6 +96,28 @@ export async function RecordCount(refTable) {
     return count;
   } catch (error) {
     console.error(error);
-    throw error; // Opcionalmente, puedes relanzar el error para manejarlo en otro lugar.
+    throw error; 
   }
+}
+
+
+export async function getRegisterInfo(Folio) {
+  //const docRef = doc(db, "Registros", Folio);
+  //const docSnap = await getDoc(docRef);
+  //return docSnap.data();
+  let Registro = null;
+    try {
+        const q = query(collection(db, "Registros"), where("Folio", "==", Folio));
+        const querySnapshot = await getDocs(q);
+  
+        querySnapshot.forEach((doc) => { 
+            if (doc.data() != null) {
+               Registro = doc.data()
+              }
+        })
+        return Registro;
+    } catch (error) {
+        console.log(error)
+        return Registro = null;
+    }
 }

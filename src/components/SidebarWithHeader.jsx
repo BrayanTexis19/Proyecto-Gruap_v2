@@ -21,7 +21,7 @@ import {
   MenuItem,
   Highlight,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FiHome,
   FiUsers,
@@ -196,36 +196,36 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
 
 const SidebarWithHeader = () => {
   const {isOpen, onOpen, onClose } = useDisclosure();
-  const [userData, setUserData] = useState(JSON.parse(window.localStorage.getItem('sessionUser')));
-  const navigate = useNavigate(); 
-  
+  const [userData, setUserData] = useState(JSON.parse(window.localStorage.getItem('sessionUser')))
+  const navigate = useNavigate();
+
   const handleDeletSesion = () => {
     setUserData(null);
-    window.localStorage.removeItem('sessionUser');
+    window.localStorage.removeItem('sessionUser')
     navigate("/login");
   }
 
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
-      <SidebarContent onClose={onClose} userData={userData} display={{ base: 'none', md: 'block' }} />
-      <Drawer
-        isOpen={isOpen}
-        placement="left"
-        onClose={onClose}
-        returnFocusOnClose={false}
-        onOverlayClick={onClose}
-        size="full"
-      >
-        <DrawerContent>
-          <SidebarContent onClose={onClose} />
-        </DrawerContent>
-      </Drawer>
-      
-      <MobileNav onOpen={onOpen} userData={userData} handleDeletSesion={handleDeletSesion} />
-      <Box ml={{ base: 0, md: 60 }} p="1">
-            <Outlet/>
-      </Box>
+    <SidebarContent onClose={onClose} userData={userData} display={{ base: 'none', md: 'block' }} />
+    <Drawer
+      isOpen={isOpen}
+      placement="left"
+      onClose={onClose}
+      returnFocusOnClose={false}
+      onOverlayClick={onClose}
+      size="full"
+    >
+      <DrawerContent>
+        <SidebarContent onClose={onClose} />
+      </DrawerContent>
+    </Drawer>
+    
+    <MobileNav onOpen={onOpen} userData={userData} handleDeletSesion={handleDeletSesion} />
+    <Box ml={{ base: 0, md: 60 }} p="1">
+          <Outlet/>
     </Box>
+  </Box>
   );
 };
 
