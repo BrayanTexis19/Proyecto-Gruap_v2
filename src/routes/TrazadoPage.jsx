@@ -60,7 +60,7 @@ const TrazadoPage = () => {
   const [locationUser, setlocationUser] = useState(null); //ubicacion  del usuario
   const [distance, setDistance] = useState(null); //distancia inicio-destino
   const [userInput, setUserInput] = useState(""); //Contenido de la caja de texto
-  const { activeStep, setActiveStep } = useSteps({
+  const {activeStep, setActiveStep } = useSteps({
     index: 0,
     count: steps.length,
   });
@@ -73,12 +73,12 @@ const TrazadoPage = () => {
       CantidadVehiculos: form.CantidadVehiculos,
       DetallesAutomovil: {
         Tipo: form.Tipo,
-        NPlaca: form.NPlaca,
+        NPlaca: form.NPlaca.toUpperCase(),
         Descripcion: form.Descripcion,
       },
       FechaRegistro: new Date().toLocaleString(),
       FechaSalida: "",
-      Folio: `${new Date().getFullYear()}-${formattedNumber}-${form.NPlaca}`,
+      Folio: `${new Date().getFullYear()}-${formattedNumber}-${form.NPlaca.toUpperCase()}`,
       TipoGrua: form.TipoGrua,
       Origen: {
         Direccion: userInput,
@@ -105,7 +105,6 @@ const TrazadoPage = () => {
       },
       Status: "0",
     };
-    //console.log(NewElement);
     const res = await CreateNewElement("Registros", NewElement);
     console.log(JSON.stringify(res));
     setForm(initialForm);

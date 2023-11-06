@@ -8,10 +8,8 @@ import {
   DrawerFooter,
   DrawerCloseButton,
   useDisclosure,
-  FormControl,
-  FormLabel,
-  FormHelperText,
   Badge,
+  InputRightElement,
 } from "@chakra-ui/react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import {
@@ -35,12 +33,12 @@ import {
 import marker from "../assets/gruapp_rc_2.svg";
 import logo from "../assets/gruapp.jpg";
 import { Icon } from "@chakra-ui/react";
-import { MdPerson, MdSecurity } from "react-icons/md";
+import { MdPerson, MdSearch, MdSecurity } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { getRegisterInfo, userExists } from "../firebase/firebase";
 import { useState, useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
-import { CircularProgress } from "@chakra-ui/react";
+import MapViewFolio from "./MapViewFolio";
 
 const LoginContainer = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -52,6 +50,7 @@ const LoginContainer = () => {
   const [folioInput, setFolioInput] = useState("");
   const [folioData, setFolioData] = useState(null);
   const [isSearchFolio, setisSearchFolio] = useState(false);
+  const [display, setDisplay] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -75,6 +74,37 @@ const LoginContainer = () => {
   }, [messageErrorF]);
 
   const handleClickSearch = () => {
+    setDisplay(true);
+  };
+
+  const handleSearch = async () => {
+    if (folioInput === "")
+      return toast({
+        title: "Upps... Ocurrio un error",
+        description: "Es necesario escribir un folio.",
+        variant: "solid",
+        status: "error",
+        duration: 4000,
+        position: "top",
+        isClosable: true,
+      });
+    const folio = await getRegisterInfo(folioInput);
+    console.log(folio);
+    if (!folio) {
+      setFolioInput("");
+      return toast({
+        title: "Upps... Ocurrio un error",
+        description: "No existen coincidencias con el folio " + folioInput,
+        variant: "solid",
+        status: "error",
+        duration: 4000,
+        position: "top",
+        isClosable: true,
+      });
+    }
+
+    setFolioData(folio);
+    setFolioInput("");
     onOpen();
   };
 
@@ -88,32 +118,6 @@ const LoginContainer = () => {
 
   const handleChangeFolio = (e) => {
     setFolioInput(e.target.value);
-  };
-
-  const handleClicSearchFolio = async () => {
-    if (folioInput === "")
-      return toast({
-        title: "Upps... Ocurrio un error",
-        description: "Es necesario escribir un folio.",
-        variant: "solid",
-        status: "error",
-        duration: 4000,
-        position: "top",
-        isClosable: true,
-      });
-    const folio = await getRegisterInfo(folioInput);
-    console.log(folio);
-    if (!folio)
-      return toast({
-        title: "Upps... Ocurrio un error",
-        description: "No existen coincidencias con el folio " + folioInput,
-        variant: "solid",
-        status: "error",
-        duration: 4000,
-        position: "top",
-        isClosable: true,
-      });
-    setFolioData(folio);
   };
 
   const handleclickAuth = async () => {
@@ -132,6 +136,27 @@ const LoginContainer = () => {
     }
   };
 
+  const handleClicOnClose = () => {
+    console.log("hi");
+    setFolioInput("");
+    setFolioData(null);
+    onClose();
+  };
+  let mensaje = { msg: "", color: "" };
+  if (folioData != null) {
+    if (folioData.Status === "0") {
+      mensaje.msg = "Asignado";
+      mensaje.color = "gray";
+    }
+    if (folioData.Status === "1") {
+      mensaje.msg = "Registrado";
+      mensaje.color = "blue";
+    }
+    if (folioData.Status === "2") {
+      mensaje.msg = "Liberado";
+      mensaje.color = "green";
+    }
+  }
   return (
     <>
       <Box
@@ -173,17 +198,43 @@ const LoginContainer = () => {
               GruApp
             </Heading>
           </Box>
-          <Box pr="3">
+          <Box display="flex" gap="3">
             <Button
               onClick={handleClickSearch}
               boxShadow="lg"
-              w="auto"
+              w="full"
               color="white"
               _hover={{ color: "blue.500", background: "white" }}
               bg="blue.500"
             >
               ¿Donde esta mi auto?
             </Button>
+            {display && (
+              <InputGroup>
+                <Input
+                  value={folioInput}
+                  onChange={handleChangeFolio}
+                  w="auto"
+                  bg="white"
+                  variant="outline"
+                  placeholder="Ingresa tu folio"
+                />
+                <InputRightElement>
+                  <Box
+                    onClick={handleSearch}
+                    _hover={{ bg: "blue.300" }}
+                    bg="blue.400"
+                    w="full"
+                    h="full"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <Icon as={MdSearch} boxSize="5" color="white" />
+                  </Box>
+                </InputRightElement>
+              </InputGroup>
+            )}
           </Box>
         </Box>
         <Box
@@ -279,69 +330,53 @@ const LoginContainer = () => {
             </Box>
           </Box>
         </Box>
-        <Drawer onClose={onClose} isOpen={isOpen} size="lg">
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader bg="blue.500" color="white">
-              <Heading textAlign="center">Encuentra tu Vehiculo</Heading>
-            </DrawerHeader>
-            <DrawerBody>
-              <Box border="2px" borderColor="gray.100" boxShadow="lg" p="4">
-                <FormControl isRequired>
-                  <FormLabel>Folio</FormLabel>
-                  <Input
-                    onChange={handleChangeFolio}
-                    placeholder="2023-0000-0000-000-00"
-                  />
-                  <FormHelperText>
-                    Escribe tu folio para obtener información acerca de tu
-                    vehiculo.
-                  </FormHelperText>
-                </FormControl>
-                {messageErrorF != "" && (
-                  <Alert status="error" variant="left-accent">
-                    <AlertIcon />
-                    <AlertTitle>Upps, Ocurrio un error!</AlertTitle>
-                    <AlertDescription>{messageErrorF}</AlertDescription>
-                  </Alert>
-                )}
-                <Button
-                  onClick={handleClicSearchFolio}
+        {folioData && (
+          <Drawer onClose={handleClicOnClose} isOpen={isOpen} size="lg">
+            <DrawerOverlay />
+            <DrawerContent>
+              <DrawerCloseButton />
+              <DrawerHeader bg="blue.500" color="white">
+                <Heading textAlign="center">Detalles</Heading>
+              </DrawerHeader>
+              <DrawerBody>
+                <Box
                   w="full"
-                  mt="3"
-                  colorScheme="twitter"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  p="5"
+                  mt="4"
+                  border="1px"
+                  borderColor="gray.200"
                   boxShadow="lg"
                 >
-                  Buscar
-                </Button>
-              </Box>
-              <Box
-                w="full"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                p="5"
-                mt="4"
-                border="1px"
-                borderColor="gray.200"
-                boxShadow="lg"
-              >
-                {folioData != null ? (
+                  {/* {folioData != null ? ( */}
                   <Box w="full">
-                    <Heading size="md">Detalles del Registro</Heading>
-                    <Box
-                      w="full"
-                      display="flex"
-                      gap="3"
-                      borderTop="1px"
-                      borderColor="gray.300"
-                      pt="2.5"
-                      justifyContent="flex-start"
-                      alignItems="center"
-                    >
-                      <Badge>Folio:</Badge>
-                      <Text>{folioData.Folio}</Text>
+                    <Box display="flex" gap="2">
+                      <Box
+                        w="full"
+                        display="flex"
+                        gap="3"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                      >
+                        <Badge>Folio:</Badge>
+                        <Text>{folioData.Folio}</Text>
+                      </Box>
+                      <Box
+                        w="full"
+                        display="flex"
+                        gap="3"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                      >
+                        <Badge>Estado:</Badge>
+                        {mensaje && (
+                          <Text fontWeight="semibold" color={mensaje.color}>
+                            {mensaje.msg}
+                          </Text>
+                        )}
+                      </Box>
                     </Box>
                     <Box
                       w="full"
@@ -363,7 +398,13 @@ const LoginContainer = () => {
                       alignItems="center"
                     >
                       <Badge>Fecha Salida:</Badge>
-                      <Text>{folioData.FechaSalida}</Text>
+                      {folioData.FechaSalida === "" ? (
+                        <Text fontWeight="semibold" color="red">
+                          Pendiente
+                        </Text>
+                      ) : (
+                        <Text>{folioData.FechaSalida}</Text>
+                      )}
                     </Box>
                     <Tabs w="full" isFitted variant="unstyled" pt="3">
                       <TabList mb="1em">
@@ -408,6 +449,7 @@ const LoginContainer = () => {
                             borderRadius: "base",
                             fontWeight: "bold",
                           }}
+                          isDisabled={folioData.Costos.Estancia === ""}
                         >
                           Costos
                         </Tab>
@@ -433,7 +475,9 @@ const LoginContainer = () => {
                               alignItems="center"
                             >
                               <Badge>Descripcion:</Badge>
-                              <Text>{folioData.DetallesAutomovil.Descripcion}</Text>
+                              <Text>
+                                {folioData.DetallesAutomovil.Descripcion}
+                              </Text>
                             </Box>
                             <Box
                               w="full"
@@ -442,48 +486,285 @@ const LoginContainer = () => {
                               justifyContent="flex-start"
                               alignItems="center"
                             >
-                              <Badge>Placas:</Badge>
+                              <Badge>Placa:</Badge>
                               <Text>{folioData.DetallesAutomovil.NPlaca}</Text>
                             </Box>
                           </Box>
                         </TabPanel>
                         <TabPanel>
-                          <p>two!</p>
+                          <Box
+                            w="full"
+                            display="flex"
+                            gap="2"
+                            justifyContent="flex-start"
+                            alignItems="center"
+                          >
+                            <Badge>Dirección:</Badge>
+                            <Text>{folioData.Origen.Direccion}</Text>
+                          </Box>
+                          <Box
+                            display="flex"
+                            gap="1"
+                            w="full"
+                            justifyContent="center"
+                            alignItems="center"
+                            mt="3"
+                          >
+                            <Box
+                              w="full"
+                              display="flex"
+                              flexDir="column"
+                              gap="1"
+                            >
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Colonia:</Badge>
+                                <Text>{folioData.Origen.Colonia}</Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Municipio:</Badge>
+                                <Text>{folioData.Origen.Municipio}</Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Codigo Postal:</Badge>
+                                <Text>{folioData.Origen.CP}</Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Latitud:</Badge>
+                                <Text>{folioData.Origen.Latitud}</Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Longitud:</Badge>
+                                <Text>{folioData.Origen.Longitud}</Text>
+                              </Box>
+                            </Box>
+                            <Box w="full" borderRadius="lg">
+                              <MapViewFolio
+                                latitud={folioData.Origen.Latitud}
+                                longitud={folioData.Origen.Longitud}
+                              />
+                            </Box>
+                          </Box>
                         </TabPanel>
                         <TabPanel>
-                          <p>tree!</p>
+                          <Box
+                            w="full"
+                            display="flex"
+                            gap="2"
+                            justifyContent="flex-start"
+                            alignItems="center"
+                          >
+                            <Badge>Dirección:</Badge>
+                            <Text>{folioData.CorralonAsignado.Direccion}</Text>
+                          </Box>
+                          <Box
+                            display="flex"
+                            gap="1"
+                            w="full"
+                            justifyContent="center"
+                            alignItems="center"
+                            mt="3"
+                          >
+                            <Box
+                              w="full"
+                              display="flex"
+                              flexDir="column"
+                              gap="1"
+                            >
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Nombre:</Badge>
+                                <Text>{folioData.CorralonAsignado.Nombre}</Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Región:</Badge>
+                                <Text>{folioData.CorralonAsignado.Region}</Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Contacto:</Badge>
+                                <Text>
+                                  {folioData.CorralonAsignado.Contacto}
+                                </Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Celular:</Badge>
+                                <Text>
+                                  {folioData.CorralonAsignado.Celular}
+                                </Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Latitud:</Badge>
+                                <Text>
+                                  {folioData.CorralonAsignado.Latitud}
+                                </Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Longitud:</Badge>
+                                <Text>
+                                  {folioData.CorralonAsignado.Longitud}
+                                </Text>
+                              </Box>
+                              <Box
+                                w="full"
+                                display="flex"
+                                gap="2"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                              >
+                                <Badge>Distancia:</Badge>
+                                <Text>
+                                  {folioData.CorralonAsignado.Distancia}m
+                                </Text>
+                              </Box>
+                            </Box>
+                            <Box w="full" borderRadius="lg">
+                              <MapViewFolio
+                                latitud={folioData.CorralonAsignado.Latitud}
+                                longitud={folioData.CorralonAsignado.Longitud}
+                              />
+                            </Box>
+                          </Box>
                         </TabPanel>
                         <TabPanel>
-                          <p>four!</p>
+                          <Box px="8">
+                            <Box>
+                              <Text
+                                textAlign="center"
+                                fontSize="lg"
+                                fontWeight="bold"
+                              >
+                                Resumen de Costos:
+                              </Text>
+                            </Box>
+                            <Box
+                              display="flex"
+                              justifyContent="space-evenly"
+                              alignItems="center"
+                            >
+                              <Badge colorScheme="blue">
+                                Cobro por Distancia:
+                              </Badge>
+                              <Text fontWeight="light">
+                                ${folioData.Costos.Distancia} pesos
+                              </Text>
+                            </Box>
+                            <Box
+                              display="flex"
+                              justifyContent="space-evenly"
+                              alignItems="center"
+                            >
+                              <Badge colorScheme="blue">
+                                Cobro por Estancia:
+                              </Badge>
+                              <Text fontWeight="light">
+                                ${folioData.Costos.Estancia} pesos
+                              </Text>
+                            </Box>
+                            <Box
+                              display="flex"
+                              justifyContent="space-evenly"
+                              alignItems="center"
+                            >
+                              <Badge colorScheme="blue">
+                                Cobro por Maniobra:
+                              </Badge>
+                              <Text fontWeight="light">
+                                ${folioData.Costos.Maniobras} pesos
+                              </Text>
+                            </Box>
+                            <Box>
+                              <Text pt="2" textAlign="end">
+                                Total: ${folioData.Costos.Total} pesos
+                              </Text>
+                            </Box>
+                          </Box>
                         </TabPanel>
                       </TabPanels>
                     </Tabs>
                   </Box>
-                ) : (
-                  <CircularProgress
-                    size="100px"
-                    isIndeterminate
-                    color="green.300"
-                  />
-                )}
-              </Box>
-            </DrawerBody>
-            <DrawerFooter
-              display="flex"
-              justifyContent="center"
-              borderTopWidth="1px"
-            >
-              <Button
-                w="full"
-                colorScheme="red"
-                boxShadow="md"
-                onClick={onClose}
+                </Box>
+              </DrawerBody>
+              <DrawerFooter
+                display="flex"
+                justifyContent="center"
+                borderTopWidth="1px"
               >
-                Cancelar
-              </Button>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
+                <Button
+                  w="full"
+                  colorScheme="red"
+                  boxShadow="md"
+                  onClick={handleClicOnClose}
+                >
+                  Cancelar
+                </Button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        )}
       </Box>
     </>
   );

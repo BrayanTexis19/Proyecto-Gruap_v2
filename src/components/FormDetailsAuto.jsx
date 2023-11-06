@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   Heading,
@@ -10,9 +11,39 @@ import {
   Select,
   Textarea,
 } from "@chakra-ui/react";
+import { useState } from "react";
+import { useToast } from "@chakra-ui/react";
 
 const FormDetailsAuto = ({ setActiveStep, handleChange, form }) => {
+  const [validationErrors, setValidationErrors] = useState({});
+  const toast = useToast();
 
+  const showToast = (title, description, status) => {
+    toast({
+      title: title,
+      description: description,
+      status: status,
+      duration: 2000,
+      isClosable: true,
+      position: "top",
+    });
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.NPlaca.trim()) {
+      errors.NPlaca = "El campo Placa es obligatorio";
+    }
+
+    if (!form.Descripcion.trim()) {
+      errors.Descripcion = "El campo Descripción es obligatorio";
+    }
+
+    setValidationErrors(errors);
+
+    return Object.keys(errors).length === 0; // Devuelve true si no hay errores
+  };
   return (
     <Box
       display="flex"
@@ -34,7 +65,12 @@ const FormDetailsAuto = ({ setActiveStep, handleChange, form }) => {
         <Box display="flex" gap="3">
           <FormControl mt="2" isRequired>
             <FormLabel>Cantidad de Vehiculos</FormLabel>
-            <Input name="CantidadVehiculos" value={form.CantidadVehiculos} onChange={handleChange} type="number" />
+            <Input
+              name="CantidadVehiculos"
+              value={form.CantidadVehiculos}
+              onChange={handleChange}
+              type="number"
+            />
             <FormHelperText>Cantidad de vehiculos involucrados</FormHelperText>
           </FormControl>
           <FormControl mt="2" isRequired>
@@ -50,25 +86,57 @@ const FormDetailsAuto = ({ setActiveStep, handleChange, form }) => {
             <FormHelperText>Tipo de vehiculo</FormHelperText>
           </FormControl>
         </Box>
-        <FormControl mt="2" isRequired>
+        <FormControl mt="2" isRequired isInvalid={!!validationErrors.NPlaca}>
           <FormLabel>Placa</FormLabel>
-          <Input name="NPlaca" value={form.NPlaca} onChange={handleChange} type="text" />
-          <FormHelperText>Numero de placa del vehiculo</FormHelperText>
+          <Input
+            name="NPlaca"
+            value={form.NPlaca}
+            onChange={handleChange}
+            type="text"
+            textTransform="uppercase"
+          />
+          {validationErrors.NPlaca ? (
+            <FormErrorMessage>{validationErrors.NPlaca}</FormErrorMessage>
+          ) : (
+            <FormHelperText>Numero de placa del vehiculo</FormHelperText>
+          )}
         </FormControl>
-        <FormControl mt="2" isRequired>
+        <FormControl mt="2" isRequired isInvalid={!!validationErrors.Descripcion}>
           <FormLabel>Detalles</FormLabel>
           <Textarea
             name="Descripcion"
             value={form.Descripcion}
-            onChange={handleChange}          
+            onChange={handleChange}
             placeholder="Color, Tamaño, Seña en particular, etc."
             size="sm"
+            textTransform="capitalize"
           />
-          <FormHelperText>Detalles especificos del vehiculo</FormHelperText>
+           {validationErrors.Descripcion ? (
+            <FormErrorMessage>{validationErrors.Descripcion}</FormErrorMessage>
+          ) : (
+            <FormHelperText>Detalles especificos del vehiculo</FormHelperText>
+          )}
         </FormControl>
-            <Button onClick={() => {
+        <Button
+          onClick={() => {
+            const isValid = validateForm();
+            if (isValid) {
               setActiveStep(1);
-            }} mt="2" colorScheme="blue" w="full">Continuar</Button>
+              setValidationErrors({});
+            } else {
+              showToast(
+                "Error de validación",
+                "Por favor, corrige los errores en el formulario.",
+                "error"
+              );
+            }
+          }}
+          mt="2"
+          colorScheme="blue"
+          w="full"
+        >
+          Continuar
+        </Button>
       </Box>
     </Box>
   );

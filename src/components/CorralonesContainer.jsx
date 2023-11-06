@@ -15,10 +15,18 @@ import {
   InputLeftElement,
   Icon,
   InputRightElement,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import DataTable from "react-data-table-component";
-import { FiUserPlus, FiTrash2, FiEdit, FiPlus } from "react-icons/fi";
-
+import { FiTrash2, FiEdit, FiPlusCircle, FiPlus } from "react-icons/fi";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 import {
   Modal,
   ModalOverlay,
@@ -69,8 +77,10 @@ const CorralonesContainer = () => {
   const [suggestions, setSuggestions] = useState([]); //Arreglo de Sugerencias de direcciones
   const [data1, setdata1] = useState([]);
   const [form, setForm] = useState(initailForm);
+  const [validationErrors, setValidationErrors] = useState({});
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
+  const [isDelet, setIsDelet] = useState(false);
   const initialRef = useRef(null);
   const finalRef = useRef(null);
   const toast = useToast();
@@ -110,6 +120,17 @@ const CorralonesContainer = () => {
       setSuggestions([]);
     }
   }, [form.Direccion]);
+
+  const showToast = (title, description, status) => {
+    toast({
+      title: title,
+      description: description,
+      status: status,
+      duration: 2000,
+      isClosable: true,
+      position: "top",
+    });
+  };
 
   const handleClickOutside = (event) => {
     const { current: wrap } = wrapperRef;
@@ -187,39 +208,65 @@ const CorralonesContainer = () => {
     setmessageAction("Nuevo");
   };
 
-  const handleClickNewUser = async () => {
-    const newElement = {
-      id: uuid(),
-      Nombre: form.Nombre,
-      Region: form.Region,
-      Rol: form.Rol,
-      Direccion: form.Direccion,
-      Coordenadas: {
-        Latitud: form.Latitud.toString(),
-        Longitud: form.Longitud.toString(),
-      },
-      Contacto: form.Contacto,
-      Celular: form.Celular,
-      Status: form.Status,
-    };
-    console.log(newElement);
-    const res = await CreateNewElement("Corralones", newElement);
-    console.log(JSON.stringify(res));
-    setForm(initailForm);
-    getData();
-    onClose();
+  const validateForm = () => {
+    const errors = {};
 
-    showToast();
+    if (!form.Nombre.trim()) {
+      errors.Nombre = "El campo Nombre o razon social es obligatorio";
+    }
+
+    if (!form.Direccion.trim()) {
+      errors.Direccion = "El campo Dirección es obligatorio";
+    }
+
+    if (!form.Contacto.trim()) {
+      errors.Contacto = "El campo Contacto es obligatorio";
+    }
+
+    if (!form.Celular.trim()) {
+      errors.Celular = "El campo Celular es obligatorio";
+    }
+
+    setValidationErrors(errors);
+
+    return Object.keys(errors).length === 0; // Devuelve true si no hay errores
   };
+  const handleClickNewUser = async () => {
+    const isValid = validateForm();
+    if (isValid) {
+      const newElement = {
+        id: uuid(),
+        Nombre: form.Nombre,
+        Region: form.Region,
+        Rol: form.Rol,
+        Direccion: form.Direccion,
+        Coordenadas: {
+          Latitud: form.Latitud.toString(),
+          Longitud: form.Longitud.toString(),
+        },
+        Contacto: form.Contacto,
+        Celular: form.Celular,
+        Status: form.Status,
+      };
+      console.log(newElement);
+      const res = await CreateNewElement("Corralones", newElement);
+      console.log(JSON.stringify(res));
+      setForm(initailForm);
+      getData();
+      onClose();
 
-  const showToast = () => {
-    toast({
-      title: "Usuario Registrado",
-      description: "El usuario ha sido registrado.",
-      status: "success",
-      duration: 4000,
-      isClosable: true,
-    });
+      showToast(
+        "Corralon Registrado",
+        "El corralon ha sido registrado.",
+        "success"
+      );
+    } else {
+      showToast(
+        "Error de validación",
+        "Por favor, corrige los errores en el formulario.",
+        "error"
+      );
+    }
   };
 
   const handleEditElement = (row) => {
@@ -242,38 +289,60 @@ const CorralonesContainer = () => {
   };
 
   const handleDeletElement = async (row) => {
-    console.log(row);
-    const res = await DeleteElement("Corralones", row.docId);
+    setUser(row);
+    setIsDelet(true);
+  };
+
+  const handleDeletUser = async () => {
+    console.log(user);
+    const res = await DeleteElement("Corralones", user.docId);
     console.log("registro eliminado:", res);
+    setIsDelet(false);
     getData();
+    setUser(null);
+    showToast(
+      "Corralón Eliminado",
+      "El corralón ha sido eliminado.",
+      "success"
+    );
+  };
+
+  const handleCancelDelet = () => {
+    setUser(null);
+    setIsDelet(false);
   };
 
   const handleClicUpdateUser = async () => {
-    console.log(user);
-    const editElement = {
-      id: user.id,
-      Nombre: form.Nombre,
-      Region: form.Region,
-      Rol: form.Rol,
-      Direccion: form.Direccion,
-      Coordenadas: {
-        Latitud: form.Latitud,
-        Longitud: form.Longitud,
-      },
-      Contacto: form.Contacto,
-      Celular: form.Celular,
-      Status: form.Status,
-    };
-    console.log(editElement);
-    const res = await UpdateElement("Corralones", user.docId, editElement);
-    console.log(JSON.stringify(res));
-    setForm(initailForm);
-    getData();
-    onClose();
+    const isValid = validateForm();
+    if (isValid) {
+      const editElement = {
+        id: user.id,
+        Nombre: form.Nombre,
+        Region: form.Region,
+        Rol: form.Rol,
+        Direccion: form.Direccion,
+        Coordenadas: {
+          Latitud: form.Latitud,
+          Longitud: form.Longitud,
+        },
+        Contacto: form.Contacto,
+        Celular: form.Celular,
+        Status: form.Status,
+      };
+      console.log(editElement);
+      const res = await UpdateElement("Corralones", user.docId, editElement);
+      console.log(JSON.stringify(res));
+      setForm(initailForm);
+      getData();
+      onClose();
+    } else {
+      showToast("Error de validación", "Por favor, corrige los errores en el formulario.", "error");
+    }
   };
 
   const handleClicOnClose = () => {
     setForm(initailForm);
+    setValidationErrors({});
     onClose();
   };
 
@@ -385,7 +454,7 @@ const CorralonesContainer = () => {
         </Heading>
         <Button
           onClick={handleClicOpenModal}
-          rightIcon={<FiUserPlus />}
+          rightIcon={<FiPlusCircle />}
           colorScheme="blue"
           size="sm"
         >
@@ -429,7 +498,7 @@ const CorralonesContainer = () => {
           <ModalCloseButton color="white" />
           <ModalBody pb={6}>
             <Box display="flex" gap="3">
-              <FormControl>
+              <FormControl isRequired isInvalid={!!validationErrors.Nombre}>
                 <FormLabel>Nombre:</FormLabel>
                 <Input
                   name="Nombre"
@@ -438,6 +507,9 @@ const CorralonesContainer = () => {
                   ref={initialRef}
                   placeholder="Nombre o razon Social"
                 />
+                {validationErrors.Nombre && (
+                  <FormErrorMessage>{validationErrors.Nombre}</FormErrorMessage>
+                )}
               </FormControl>
               <FormControl>
                 <FormLabel>Status:</FormLabel>
@@ -481,7 +553,11 @@ const CorralonesContainer = () => {
               </FormControl>
             </Box>
             <Box display="flex" gap="3">
-              <FormControl mt={3}>
+              <FormControl
+                mt={3}
+                isRequired
+                isInvalid={!!validationErrors.Contacto}
+              >
                 <FormLabel>Contacto:</FormLabel>
                 <Input
                   name="Contacto"
@@ -489,9 +565,18 @@ const CorralonesContainer = () => {
                   onChange={handleChange}
                   placeholder="Ingrese datos"
                 />
+                {validationErrors.Contacto && (
+                  <FormErrorMessage>
+                    {validationErrors.Contacto}
+                  </FormErrorMessage>
+                )}
               </FormControl>
 
-              <FormControl mt={3}>
+              <FormControl
+                mt={3}
+                isRequired
+                isInvalid={!!validationErrors.Celular}
+              >
                 <FormLabel>Celular:</FormLabel>
                 <Input
                   name="Celular"
@@ -500,6 +585,11 @@ const CorralonesContainer = () => {
                   type="tel"
                   placeholder="Ingrese datos"
                 />
+                {validationErrors.Celular && (
+                  <FormErrorMessage>
+                    {validationErrors.Celular}
+                  </FormErrorMessage>
+                )}
               </FormControl>
             </Box>
 
@@ -516,37 +606,44 @@ const CorralonesContainer = () => {
                 Dirección:
               </Text>
               <Box position="relative" width="full" zIndex={2}>
-                <InputGroup w="auto">
-                  <InputLeftElement>
-                    <Icon as={MdSearch} boxSize="5" color="gray.400" />
-                  </InputLeftElement>
-                  <Input
-                    name="Direccion"
-                    textTransform="capitalize"
-                    value={form.Direccion}
-                    onClick={() => setDisplay(!display)}
-                    onChange={handleChange}
-                    placeholder="Escriba la dirección"
-                    size="md"
-                    variant="outline"
-                    bg="white"
-                    borderRadius="md"
-                  />
-                  <InputRightElement>
-                    {form.Direccion != "" ? (
-                      <Button
-                        bg="blue.300"
-                        _hover={{ bg: "blue.200" }}
-                        color="white"
-                        onClick={clearInput}
-                      >
-                        x
-                      </Button>
-                    ) : (
-                      <Box></Box>
-                    )}
-                  </InputRightElement>
-                </InputGroup>
+                <FormControl isRequired isInvalid={!!validationErrors.Direccion}>
+                  <InputGroup w="auto">
+                    <InputLeftElement>
+                      <Icon as={MdSearch} boxSize="5" color="gray.400" />
+                    </InputLeftElement>
+                    <Input
+                      name="Direccion"
+                      textTransform="capitalize"
+                      value={form.Direccion}
+                      onClick={() => setDisplay(!display)}
+                      onChange={handleChange}
+                      placeholder="Escriba la dirección"
+                      size="md"
+                      variant="outline"
+                      bg="white"
+                      borderRadius="md"
+                    />
+                    <InputRightElement>
+                      {form.Direccion != "" ? (
+                        <Button
+                          bg="blue.300"
+                          _hover={{ bg: "blue.200" }}
+                          color="white"
+                          onClick={clearInput}
+                        >
+                          x
+                        </Button>
+                      ) : (
+                        <Box></Box>
+                      )}
+                    </InputRightElement>
+                  </InputGroup>
+                  {validationErrors.Direccion && (
+                  <FormErrorMessage>
+                    {validationErrors.Direccion}
+                  </FormErrorMessage>
+                )}
+                </FormControl>
                 {display && (
                   <Box
                     position="absolute"
@@ -603,7 +700,9 @@ const CorralonesContainer = () => {
                 Actualizar
               </Button>
             )}
-            <Button colorScheme="red" onClick={handleClicOnClose}>Cancelar</Button>
+            <Button colorScheme="red" onClick={handleClicOnClose}>
+              Cancelar
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -617,7 +716,9 @@ const CorralonesContainer = () => {
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton />
-            <DrawerHeader bg="blue.500" color="white">{user.Nombre}</DrawerHeader>
+            <DrawerHeader bg="blue.500" color="white">
+              {user.Nombre}
+            </DrawerHeader>
 
             <DrawerBody>
               <Box display="flex" flexDir="column" gap="2">
@@ -655,6 +756,28 @@ const CorralonesContainer = () => {
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
+      )}
+      {user != null && (
+        <AlertDialog isOpen={isDelet} onClose={() => setIsDelet(false)}>
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Eliminar Corralon
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                ¿Deseas eliminar al corralon {user.Nombre}?
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button onClick={handleCancelDelet}>Cancelar</Button>
+                <Button colorScheme="red" onClick={handleDeletUser} ml={3}>
+                  Eliminar
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       )}
     </Box>
   );

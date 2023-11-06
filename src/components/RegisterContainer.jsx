@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   HStack,
@@ -17,18 +18,33 @@ import {
   ModalOverlay,
   Text,
 } from "@chakra-ui/react";
-import { FiPlusCircle, FiTrash2, FiUserPlus } from "react-icons/fi";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
+import { FiPlusCircle, FiTrash2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import { useState, useEffect, useRef } from "react";
-import { DeleteElement, ObtenerDataDB, UpdateElement } from "../firebase/firebase";
+import {
+  DeleteElement,
+  ObtenerDataDB,
+  UpdateElement,
+} from "../firebase/firebase";
+import copy from "clipboard-copy";
+import { useToast } from "@chakra-ui/react";
+import { CopyIcon } from "@chakra-ui/icons";
 
 const initialForm = {
   Distancia: "",
   Estancia: "",
   Maniobras: "",
   FechaSalida: "",
-  Folio: ""
+  Folio: "",
 };
 
 const RegisterContainer = () => {
@@ -38,15 +54,45 @@ const RegisterContainer = () => {
   const [costos, setCostos] = useState({ cost1: 0, cost2: 0, cost3: 0 });
   const [mostrarModal, setMostrarModal] = useState(false);
   const [messageAction, setmessageAction] = useState("");
-  //const [RolUser, setRolUser] = useState(JSON.parse(window.localStorage.getItem('sessionUser')));
+  const [user, setUser] = useState(null);
+  const [isDelet, setIsDelet] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const navigation = useNavigate();
   const initialRef = useRef(null);
   const finalRef = useRef(null);
+  const toast = useToast();
 
   useEffect(() => {
     getData();
   }, []);
 
+  const showToast = (title, description, status) => {
+    toast({
+      title: title,
+      description: description,
+      status: status,
+      duration: 2000,
+      isClosable: true,
+      position: "top",
+    });
+  };
+
+  const CopyToClipboardExample = async (textToCopy) => {
+    try {
+      await copy(textToCopy);
+      return toast({
+        title: "Copiado al portapapeles",
+        description: textToCopy,
+        variant: "solid",
+        status: "success",
+        duration: 1000,
+        position: "top",
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error al copiar al portapapeles: " + error);
+    }
+  };
   async function getData() {
     try {
       const datos = await ObtenerDataDB("Registros");
@@ -56,50 +102,96 @@ const RegisterContainer = () => {
     }
   }
 
+  const validateFormCostos = () => {
+    const errors = {};
+
+    if (!form.Estancia.trim()) {
+      errors.Estancia = "El campo Dias de Estancia es obligatorio";
+    }
+
+    if (!form.Maniobras.trim()) {
+      errors.Maniobras = "El campo Maniobras es obligatorio";
+    }
+
+    setValidationErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateFormSal = () => {
+    const errors = {};
+
+    if (!form.FechaSalida.trim()) {
+      errors.FechaSalida = "El campo Fecha es obligatorio";
+    }
+
+    if (!form.Folio.trim()) {
+      errors.Folio = "El campo Folio es obligatorio";
+    }
+
+    setValidationErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
   const handleRegisterNewCostos = async () => {
-    const editElement = {
-      docid: Registro.docId,
-      CantidadVehiculos: Registro.CantidadVehiculos,
-      DetallesAutomovil: {
-        Tipo: Registro.DetallesAutomovil.Tipo,
-        NPlaca: Registro.DetallesAutomovil.NPlaca,
-        Descripcion: Registro.DetallesAutomovil.Descripcion,
-      },
-      FechaRegistro: Registro.FechaRegistro,
-      FechaSalida: "",
-      Folio: Registro.Folio,
-      TipoGrua: Registro.TipoGrua,
-      Origen: {
-        Direccion: Registro.Origen.Direccion,
-        Municipio: Registro.Origen.Municipio,
-        Colonia: Registro.Origen.Colonia,
-        CP: Registro.Origen.CP,
-        Latitud: Registro.Origen.Latitud,
-        Longitud: Registro.Origen.Longitud,
-      },
-      CorralonAsignado: {
-        Direccion: Registro.CorralonAsignado.Direccion,
-        Nombre: Registro.CorralonAsignado.Nombre,
-        Region: Registro.CorralonAsignado.Region,
-        Distancia: Registro.CorralonAsignado.Distancia,
-        Contacto: Registro.CorralonAsignado.Contacto,
-        Celular: Registro.CorralonAsignado.Celular,
-        Latitud: Registro.CorralonAsignado.Latitud,
-        Longitud: Registro.CorralonAsignado.Longitud,
-      },
-      Costos: {
-        Distancia: costos.cost1,
-        Estancia: costos.cost2,
-        Maniobras: costos.cost3,
-        Total: costos.cost1 + costos.cost2 + costos.cost3,
-      },
-      Status: "1",
-    };
-    const res = await UpdateElement("Registros", Registro.docId, editElement);
-    console.log(JSON.stringify(res));
-    setForm(initialForm);
-    getData();
-    setMostrarModal(false);
+    const isValid = validateFormCostos();
+    if (isValid) {
+      const editElement = {
+        docid: Registro.docId,
+        CantidadVehiculos: Registro.CantidadVehiculos,
+        DetallesAutomovil: {
+          Tipo: Registro.DetallesAutomovil.Tipo,
+          NPlaca: Registro.DetallesAutomovil.NPlaca,
+          Descripcion: Registro.DetallesAutomovil.Descripcion,
+        },
+        FechaRegistro: Registro.FechaRegistro,
+        FechaSalida: "",
+        Folio: Registro.Folio,
+        TipoGrua: Registro.TipoGrua,
+        Origen: {
+          Direccion: Registro.Origen.Direccion,
+          Municipio: Registro.Origen.Municipio,
+          Colonia: Registro.Origen.Colonia,
+          CP: Registro.Origen.CP,
+          Latitud: Registro.Origen.Latitud,
+          Longitud: Registro.Origen.Longitud,
+        },
+        CorralonAsignado: {
+          Direccion: Registro.CorralonAsignado.Direccion,
+          Nombre: Registro.CorralonAsignado.Nombre,
+          Region: Registro.CorralonAsignado.Region,
+          Distancia: Registro.CorralonAsignado.Distancia,
+          Contacto: Registro.CorralonAsignado.Contacto,
+          Celular: Registro.CorralonAsignado.Celular,
+          Latitud: Registro.CorralonAsignado.Latitud,
+          Longitud: Registro.CorralonAsignado.Longitud,
+        },
+        Costos: {
+          Distancia: costos.cost1,
+          Estancia: costos.cost2,
+          Maniobras: costos.cost3,
+          Total: costos.cost1 + costos.cost2 + costos.cost3,
+        },
+        Status: "1",
+      };
+      const res = await UpdateElement("Registros", Registro.docId, editElement);
+      console.log(JSON.stringify(res));
+      setForm(initialForm);
+      getData();
+      setMostrarModal(false);
+      showToast(
+        "Costos Registrados",
+        "Los costos han sido registrados.",
+        "success"
+      );
+    } else {
+      showToast(
+        "Error de validación",
+        "Por favor, corrige los errores en el formulario.",
+        "error"
+      );
+    }
   };
 
   const handleClicRegisterLiberacion = (row) => {
@@ -128,70 +220,114 @@ const RegisterContainer = () => {
 
   const handleClicOnClose = () => {
     setForm(initialForm);
+    setValidationErrors({});
     setMostrarModal(false);
   };
 
-  const handleRegisterSal = async() => {
-
-    if (Registro.Folio === form.Folio) {
-
-      if (Registro.Costos.Estancia !== "" && Registro.Costos.Maniobras !== "")
-      {
-        const editElement = {
-          docid: Registro.docId,
-          CantidadVehiculos: Registro.CantidadVehiculos,
-          DetallesAutomovil: {
-            Tipo: Registro.DetallesAutomovil.Tipo,
-            NPlaca: Registro.DetallesAutomovil.NPlaca,
-            Descripcion: Registro.DetallesAutomovil.Descripcion,
-          },
-          FechaRegistro: Registro.FechaRegistro,
-          FechaSalida: form.FechaSalida,
-          Folio: Registro.Folio,
-          TipoGrua: Registro.TipoGrua,
-          Origen: {
-            Direccion: Registro.Origen.Direccion,
-            Municipio: Registro.Origen.Municipio,
-            Colonia: Registro.Origen.Colonia,
-            CP: Registro.Origen.CP,
-            Latitud: Registro.Origen.Latitud,
-            Longitud: Registro.Origen.Longitud,
-          },
-          CorralonAsignado: {
-            Direccion: Registro.CorralonAsignado.Direccion,
-            Nombre: Registro.CorralonAsignado.Nombre,
-            Region: Registro.CorralonAsignado.Region,
-            Distancia: Registro.CorralonAsignado.Distancia,
-            Contacto: Registro.CorralonAsignado.Contacto,
-            Celular: Registro.CorralonAsignado.Celular,
-            Latitud: Registro.CorralonAsignado.Latitud,
-            Longitud: Registro.CorralonAsignado.Longitud,
-          },
-          Costos: {
-            Distancia: Registro.Costos.Distancia,
-            Estancia: Registro.Costos.Estancia,
-            Maniobras: Registro.Costos.Maniobras,
-            Total: Registro.Costos.Total,
-          },
-          Status: "2",
-        };
-        console.log(editElement)
-        const res = await UpdateElement("Registros", Registro.docId, editElement);
-        console.log(JSON.stringify(res));
-        setForm(initialForm);
-        getData();
-        return setMostrarModal(false);
+  const handleRegisterSal = async () => {
+    const isValid = validateFormSal();
+    if (isValid) {
+      if (Registro.Folio === form.Folio) {
+        if (Registro.Costos.Estancia != "") {
+          const editElement = {
+            docid: Registro.docId,
+            CantidadVehiculos: Registro.CantidadVehiculos,
+            DetallesAutomovil: {
+              Tipo: Registro.DetallesAutomovil.Tipo,
+              NPlaca: Registro.DetallesAutomovil.NPlaca,
+              Descripcion: Registro.DetallesAutomovil.Descripcion,
+            },
+            FechaRegistro: Registro.FechaRegistro,
+            FechaSalida: form.FechaSalida,
+            Folio: Registro.Folio,
+            TipoGrua: Registro.TipoGrua,
+            Origen: {
+              Direccion: Registro.Origen.Direccion,
+              Municipio: Registro.Origen.Municipio,
+              Colonia: Registro.Origen.Colonia,
+              CP: Registro.Origen.CP,
+              Latitud: Registro.Origen.Latitud,
+              Longitud: Registro.Origen.Longitud,
+            },
+            CorralonAsignado: {
+              Direccion: Registro.CorralonAsignado.Direccion,
+              Nombre: Registro.CorralonAsignado.Nombre,
+              Region: Registro.CorralonAsignado.Region,
+              Distancia: Registro.CorralonAsignado.Distancia,
+              Contacto: Registro.CorralonAsignado.Contacto,
+              Celular: Registro.CorralonAsignado.Celular,
+              Latitud: Registro.CorralonAsignado.Latitud,
+              Longitud: Registro.CorralonAsignado.Longitud,
+            },
+            Costos: {
+              Distancia: Registro.Costos.Distancia,
+              Estancia: Registro.Costos.Estancia,
+              Maniobras: Registro.Costos.Maniobras,
+              Total: Registro.Costos.Total,
+            },
+            Status: "2",
+          };
+          console.log(editElement);
+          const res = await UpdateElement(
+            "Registros",
+            Registro.docId,
+            editElement
+          );
+          console.log(JSON.stringify(res));
+          setForm(initialForm);
+          getData();
+          setMostrarModal(false);
+          showToast(
+            "Liberación Registrada",
+            "El registro ha sido liberado.",
+            "success"
+          );
+        }
+        else {
+          return showToast(
+            "Error de Liberación",
+            "No puedes liberar un registro sin haber registrado costos anteriormente.",
+            "error"
+          );
+        }
       }
-      return console.log("Es necesario registrar costos")
+      return showToast(
+        "Error de Liberación",
+        "No coincide el folio ingresado con el del registro.",
+        "error"
+      );
+    } else {
+      showToast(
+        "Error de validación",
+        "Por favor, corrige los errores en el formulario.",
+        "error"
+      );
     }
-    return console.log("error no coincide el folio")
-  }
+  };
 
-  const handleclicDeletRegister = async(row) => {
-    const res = await DeleteElement("Registros", row.docId);
+  const handleDeletElement = async (row) => {
+    setUser(row);
+    setIsDelet(true);
+  };
+
+  const handleDeletUser = async () => {
+    console.log(user);
+    const res = await DeleteElement("Registros", user.docId);
     console.log("registro eliminado:", res);
+    setIsDelet(false);
     getData();
-  }
+    setUser(null);
+    showToast(
+      "Registro Eliminado",
+      "El registro ha sido eliminado.",
+      "success"
+    );
+  };
+
+  const handleCancelDelet = () => {
+    setUser(null);
+    setIsDelet(false);
+  };
 
   const handleChange = (e) => {
     setForm({
@@ -226,7 +362,21 @@ const RegisterContainer = () => {
   };
 
   const Headers = [
-    { name: "Folio", selector: (row) => row.Folio, sortable: true },
+    {
+      name: "Folio",
+      selector: (row) => (
+        <Box display="flex" alignItems="center" gap="1">
+          <Text
+            fontWeight="semibold"
+            onClick={() => CopyToClipboardExample(row.Folio)}
+          >
+            {row.Folio}
+          </Text>
+          <CopyIcon onClick={() => CopyToClipboardExample(row.Folio)} />
+        </Box>
+      ),
+      sortable: true,
+    },
     {
       name: "Detalles Vehiculo",
       selector: (row) => (
@@ -373,7 +523,7 @@ const RegisterContainer = () => {
             size="sm"
             colorScheme="red"
             className="btn-eliminar"
-            onClick={() => handleclicDeletRegister(row)}
+            onClick={() => handleDeletElement(row)}
           >
             Eliminar
           </Button>
@@ -383,10 +533,11 @@ const RegisterContainer = () => {
     },
   ];
 
-  const columns = JSON.parse(localStorage.getItem("sessionUser")).Rol === "Admin"
-  ? columnsPermission
-  : Headers;
-  
+  const columns =
+    JSON.parse(localStorage.getItem("sessionUser")).Rol === "Admin"
+      ? columnsPermission
+      : Headers;
+
   return (
     <Box h="auto" w="auto" bg="white">
       <Box
@@ -400,7 +551,7 @@ const RegisterContainer = () => {
         </Heading>
         <Button
           onClick={() => navigation("/Trazado-Rutas")}
-          rightIcon={<FiUserPlus />}
+          rightIcon={<FiPlusCircle />}
           colorScheme="blue"
           size="sm"
         >
@@ -459,7 +610,7 @@ const RegisterContainer = () => {
                   </FormHelperText>
                 </FormControl>
 
-                <FormControl isRequired>
+                <FormControl isRequired isInvalid={!!validationErrors.Estancia}>
                   <FormLabel>Dias de Estancia:</FormLabel>
                   <Input
                     name="Estancia"
@@ -467,12 +618,21 @@ const RegisterContainer = () => {
                     onChange={handleChange}
                     type="number"
                   />
-                  <FormHelperText>
-                    Numero de dias que el automovil estuvo en el corralon
-                  </FormHelperText>
+                  {validationErrors.Estancia ? (
+                    <FormErrorMessage>
+                      {validationErrors.Estancia}
+                    </FormErrorMessage>
+                  ) : (
+                    <FormHelperText>
+                      Numero de dias que el automovil estuvo en el corralon
+                    </FormHelperText>
+                  )}
                 </FormControl>
 
-                <FormControl isRequired>
+                <FormControl
+                  isRequired
+                  isInvalid={!!validationErrors.Maniobras}
+                >
                   <FormLabel>Maniobras:</FormLabel>
                   <Input
                     name="Maniobras"
@@ -480,10 +640,16 @@ const RegisterContainer = () => {
                     onChange={handleChange}
                     type="number"
                   />
-                  <FormHelperText>
-                    Numero de maniobras realizadas al momento del traslado del
-                    vehiculo
-                  </FormHelperText>
+                  {validationErrors.Maniobras ? (
+                    <FormErrorMessage>
+                      {validationErrors.Maniobras}
+                    </FormErrorMessage>
+                  ) : (
+                    <FormHelperText>
+                      Numero de maniobras realizadas al momento del traslado del
+                      vehiculo
+                    </FormHelperText>
+                  )}
                 </FormControl>
                 <Box
                   border="1px"
@@ -533,7 +699,10 @@ const RegisterContainer = () => {
               </Box>
             ) : (
               <Box>
-                <FormControl isRequired>
+                <FormControl
+                  isRequired
+                  isInvalid={!!validationErrors.FechaSalida}
+                >
                   <FormLabel>Fecha de Liberación:</FormLabel>
                   <Input
                     name="FechaSalida"
@@ -542,41 +711,57 @@ const RegisterContainer = () => {
                     type="date"
                     size="md"
                   />
-                  <FormHelperText>
-                    Fecha de liberación del vehiculo alojado en el corralón
-                  </FormHelperText>
+                  {validationErrors.FechaSalida ? (
+                    <FormErrorMessage>
+                      {validationErrors.FechaSalida}
+                    </FormErrorMessage>
+                  ) : (
+                    <FormHelperText>
+                      Fecha de liberación del vehiculo alojado en el corralón
+                    </FormHelperText>
+                  )}
                 </FormControl>
-                <FormControl mt="3" isRequired>
+                <FormControl
+                  mt="3"
+                  isRequired
+                  isInvalid={!!validationErrors.Folio}
+                >
                   <FormLabel>Confirmación:</FormLabel>
                   <Input
                     name="Folio"
                     value={form.Folio}
                     onChange={handleChange}
-                      type="text"
-                      placeholder="0000-0000-000-000-000"
+                    type="text"
+                    placeholder="0000-0000-000-000-000"
                   />
-                  <FormHelperText>
-                    Escriba el folio del reporte a liberar
-                  </FormHelperText>
+                  {validationErrors.Folio ? (
+                    <FormErrorMessage>
+                      {validationErrors.Folio}
+                    </FormErrorMessage>
+                  ) : (
+                    <FormHelperText>
+                      Escriba el folio del reporte a liberar
+                    </FormHelperText>
+                  )}
                 </FormControl>
               </Box>
             )}
           </ModalBody>
           <ModalFooter>
-            {messageAction === 'Registrar Costos' ?
-            (
-              <Button onClick={handleRegisterNewCostos} colorScheme="blue" mr={3}>
-              Guardar
+            {messageAction === "Registrar Costos" ? (
+              <Button
+                onClick={handleRegisterNewCostos}
+                colorScheme="blue"
+                mr={3}
+              >
+                Guardar
               </Button>
-            ) 
-            :
-            (
+            ) : (
               <Button onClick={handleRegisterSal} colorScheme="blue" mr={3}>
-              Liberar
+                Liberar
               </Button>
-            )
-            }
-           
+            )}
+
             {/* <Button onClick={() => console.log()} colorScheme="blue" mr={3}>
                 Actualizar
               </Button> */}
@@ -586,6 +771,28 @@ const RegisterContainer = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      {user != null && (
+        <AlertDialog isOpen={isDelet} onClose={() => setIsDelet(false)}>
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Eliminar Registro
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                ¿Deseas eliminar el registro con folio {user.Folio}?
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button onClick={handleCancelDelet}>Cancelar</Button>
+                <Button colorScheme="red" onClick={handleDeletUser} ml={3}>
+                  Eliminar
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+      )}
     </Box>
   );
 };

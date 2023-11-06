@@ -9,6 +9,7 @@ import {
   Select,
   Input,
   Badge,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import DataTable from "react-data-table-component";
 import { FiUserPlus, FiTrash2, FiEdit } from "react-icons/fi";
@@ -22,10 +23,23 @@ import {
   ModalBody,
   ModalCloseButton,
 } from "@chakra-ui/react";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from "@chakra-ui/react";
 import { useRef, useState, useEffect } from "react";
-import { CreateNewElement, DeleteElement, ObtenerDataDB, UpdateElement } from "../firebase/firebase";
+import {
+  CreateNewElement,
+  DeleteElement,
+  ObtenerDataDB,
+  UpdateElement,
+} from "../firebase/firebase";
 import { v4 as uuid } from "uuid";
-import { useToast } from '@chakra-ui/react'
+import { useToast } from "@chakra-ui/react";
 
 const initailForm = {
   Nombre: "",
@@ -38,14 +52,16 @@ const initailForm = {
 };
 
 const UserContainer = () => {
-  const {isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isDelet, setIsDelet] = useState(false);
   const [data1, setdata1] = useState([]);
   const [form, setForm] = useState(initailForm);
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
   const initialRef = useRef(null);
   const finalRef = useRef(null);
-  const toast = useToast()
+  const toast = useToast();
 
   useEffect(() => {
     getData();
@@ -70,41 +86,76 @@ const UserContainer = () => {
   const handleClicOpenModal = () => {
     onOpen();
     setmessageAction("Nuevo");
-  }
-  const handleClickNewUser = async () => {
-    const newElement = {
-      uid: uuid(),
-      Nombre: form.Nombre,
-      ApellidoP: form.ApellidoP,
-      ApellidoM: form.ApellidoM,
-      Correo: form.Correo,
-      Password: form.Password,
-      Rol: form.Rol,
-      Status: form.Status,
-    };
-    const res = await CreateNewElement("Usuarios", newElement);
-    console.log(JSON.stringify(res));
-    setForm(initailForm);
-    getData();
-    onClose();
-
-    showToast();
   };
 
-  const showToast = () => {
+  const validateForm = () => {
+    const errors = {};
+  
+    if (!form.Nombre.trim()) {
+      errors.Nombre = "El campo Nombre es obligatorio";
+    }
+
+    if (!form.ApellidoP.trim()) {
+      errors.ApellidoP = "El campo Apellido Paterno es obligatorio";
+    } 
+
+    if (!form.ApellidoM.trim()) {
+      errors.ApellidoM = "El campo Apellido Materno es obligatorio";
+    } 
+  
+    if (!form.Correo.trim()) {
+      errors.Correo = "El campo Correo es obligatorio";
+    } 
+
+    if (!form.Password.trim()) {
+      errors.Password = "El campo Contraseña es obligatorio";
+    } 
+  
+    setValidationErrors(errors);
+  
+    return Object.keys(errors).length === 0; // Devuelve true si no hay errores
+  };
+
+  const handleClickNewUser = async () => {
+    const isValid = validateForm();
+    if (isValid) {
+      const newElement = {
+        uid: uuid(),
+        Nombre: form.Nombre,
+        ApellidoP: form.ApellidoP,
+        ApellidoM: form.ApellidoM,
+        Correo: form.Correo,
+        Password: form.Password,
+        Rol: form.Rol,
+        Status: form.Status,
+      };
+      const res = await CreateNewElement("Usuarios", newElement);
+      console.log(JSON.stringify(res));
+      setForm(initailForm);
+      getData();
+      onClose();
+  
+      showToast("Usuario Registrado", "El usuario ha sido registrado.", "success");
+    } else {
+      showToast("Error de validación", "Por favor, corrige los errores en el formulario.", "error");
+    }
+  };
+
+  const showToast = (title, description, status) => {
     toast({
-      title: 'Usuario Registrado',
-      description: "El usuario ha sido registrado.",
-      status: 'success',
-      duration: 4000,
+      title: title,
+      description: description,
+      status: status,
+      duration: 2000,
       isClosable: true,
-    })
-  }
+      position: "top",
+    });
+  };
 
   const handleEditElement = (row) => {
     setUser(row);
     setmessageAction("Editar");
-    console.log(row)
+    console.log(row);
     const userEdit = {
       Nombre: row.Nombre,
       ApellidoP: row.ApellidoP,
@@ -113,41 +164,61 @@ const UserContainer = () => {
       Password: row.Password,
       Rol: row.Rol,
       Status: row.Status,
-    }
+    };
     setForm(userEdit);
     onOpen();
-  }
+  };
 
   const handleDeletElement = async (row) => {
-    console.log(row)
-    const res = await DeleteElement("Usuarios", row.docId);
+    setUser(row);
+    setIsDelet(true);
+  };
+
+  const handleDeletUser = async () => {
+    console.log(user)
+    const res = await DeleteElement("Usuarios", user.docId);
     console.log("registro eliminado:", res);
+    setIsDelet(false);
     getData();
+    setUser(null);
+    showToast("Usuario Eliminado", "El usuario ha sido eliminado.", "success");
+   };
+  
+  const handleCancelDelet = () => {
+    setUser(null);
+    setIsDelet(false)
   }
 
   const handleClicUpdateUser = async () => {
-    const editElement = {
-      uid: user.uid,
-      Nombre: form.Nombre,
-      ApellidoP: form.ApellidoP,
-      ApellidoM: form.ApellidoM,
-      Correo: form.Correo,
-      Password: form.Password,
-      Rol: form.Rol,
-      Status: form.Status,
-    };
-    console.log(editElement);
-    const res = await UpdateElement("Usuarios", user.docId, editElement)
-    console.log(JSON.stringify(res));
-    setForm(initailForm);
-    getData();
-    onClose();
-  }
+    const isValid = validateForm();
+    if (isValid) {
+      const editElement = {
+        uid: user.uid,
+        Nombre: form.Nombre,
+        ApellidoP: form.ApellidoP,
+        ApellidoM: form.ApellidoM,
+        Correo: form.Correo,
+        Password: form.Password,
+        Rol: form.Rol,
+        Status: form.Status,
+      };
+      console.log(editElement);
+      const res = await UpdateElement("Usuarios", user.docId, editElement);
+      console.log(JSON.stringify(res));
+      setForm(initailForm);
+      getData();
+      onClose();
+    } else {
+      showToast("Error de validación", "Por favor, corrige los errores en el formulario.", "error");
+    }
+  
+  };
 
   const handleClicOnClose = () => {
     setForm(initailForm);
+    setValidationErrors({})
     onClose();
-  }
+  };
 
   const customStyles = {
     headRow: {
@@ -178,7 +249,9 @@ const UserContainer = () => {
             Activo
           </Badge>
         ) : (
-          <Badge fontWeight="medium" colorScheme="red">Inactivo</Badge>
+          <Badge fontWeight="medium" colorScheme="red">
+            Inactivo
+          </Badge>
         ),
     },
     {
@@ -208,7 +281,7 @@ const UserContainer = () => {
       ignoreRowClick: true,
     },
   ];
-  
+
   return (
     <Box h="auto" w="auto" bg="white">
       <Box
@@ -265,7 +338,7 @@ const UserContainer = () => {
           </ModalHeader>
           <ModalCloseButton color="white" />
           <ModalBody pb={6}>
-            <FormControl isRequired>
+            <FormControl isRequired isInvalid={!!validationErrors.Nombre}>
               <FormLabel>Nombre:</FormLabel>
               <Input
                 name="Nombre"
@@ -274,10 +347,13 @@ const UserContainer = () => {
                 ref={initialRef}
                 placeholder="Nombre Completo"
               />
+              {validationErrors.Nombre && (
+                <FormErrorMessage>{validationErrors.Nombre}</FormErrorMessage>
+              )}
             </FormControl>
 
             <Box display="flex" gap="3">
-              <FormControl mt={3} isRequired>
+              <FormControl mt={3} isRequired isInvalid={!!validationErrors.ApellidoP}>
                 <FormLabel>Apellido Paterno:</FormLabel>
                 <Input
                   name="ApellidoP"
@@ -285,9 +361,12 @@ const UserContainer = () => {
                   onChange={handleChange}
                   placeholder="Ingrese datos"
                 />
+                 {validationErrors.ApellidoP && (
+                <FormErrorMessage>{validationErrors.ApellidoP}</FormErrorMessage>
+              )}
               </FormControl>
 
-              <FormControl mt={3} isRequired>
+              <FormControl mt={3} isRequired isInvalid={!!validationErrors.ApellidoM}>
                 <FormLabel>Apellido Materno:</FormLabel>
                 <Input
                   name="ApellidoM"
@@ -295,10 +374,13 @@ const UserContainer = () => {
                   onChange={handleChange}
                   placeholder="Ingrese datos"
                 />
+                 {validationErrors.ApellidoM && (
+                <FormErrorMessage>{validationErrors.ApellidoM}</FormErrorMessage>
+              )}
               </FormControl>
             </Box>
             <Box display="flex" gap="3">
-              <FormControl mt={3} isRequired>
+              <FormControl mt={3} isRequired isInvalid={!!validationErrors.Correo}>
                 <FormLabel>Correo:</FormLabel>
                 <Input
                   name="Correo"
@@ -306,9 +388,12 @@ const UserContainer = () => {
                   onChange={handleChange}
                   placeholder="Ingrese datos"
                 />
+                {validationErrors.Correo && (
+                  <FormErrorMessage>{validationErrors.Correo}</FormErrorMessage>
+                )}
               </FormControl>
 
-              <FormControl mt={3} is isRequired>
+              <FormControl mt={3} is isRequired isInvalid={!!validationErrors.Password}>
                 <FormLabel>Contraseña:</FormLabel>
                 <Input
                   name="Password"
@@ -317,6 +402,9 @@ const UserContainer = () => {
                   type="password"
                   placeholder="Ingrese datos"
                 />
+                   {validationErrors.Password && (
+                  <FormErrorMessage>{validationErrors.Password}</FormErrorMessage>
+                )}
               </FormControl>
             </Box>
 
@@ -333,30 +421,55 @@ const UserContainer = () => {
 
               <FormControl mt={3} isRequired>
                 <FormLabel>Estado:</FormLabel>
-                <Select name="Status" onChange={handleChange} isReadOnly value={form.Status}>
-                    <option value='Activo'>Activo</option>
-                    <option value='Inactivo'>Inactivo</option>
-                </Select> 
+                <Select
+                  name="Status"
+                  onChange={handleChange}
+                  isReadOnly
+                  value={form.Status}
+                >
+                  <option value="Activo">Activo</option>
+                  <option value="Inactivo">Inactivo</option>
+                </Select>
               </FormControl>
             </Box>
           </ModalBody>
           <ModalFooter>
-             {
-              messageAction === 'Nuevo' ? (
-                <Button onClick={handleClickNewUser} colorScheme="blue" mr={3}>
-                  Guardar
-                </Button>
-              )
-                : (
-                <Button onClick={handleClicUpdateUser} colorScheme="blue" mr={3}>
-                  Actualizar
-                </Button>
-              )
-             }
+            {messageAction === "Nuevo" ? (
+              <Button onClick={handleClickNewUser} colorScheme="blue" mr={3}>
+                Guardar
+              </Button>
+            ) : (
+              <Button onClick={handleClicUpdateUser} colorScheme="blue" mr={3}>
+                Actualizar
+              </Button>
+            )}
             <Button onClick={handleClicOnClose}>Cancelar</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
+      {user !=
+        null && (
+          <AlertDialog isOpen={isDelet} onClose={() => setIsDelet(false)}>
+            <AlertDialogOverlay>
+              <AlertDialogContent>
+                <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                  Eliminar Usuario
+                </AlertDialogHeader>
+
+                <AlertDialogBody>
+                  ¿Deseas eliminar al usuario {user.Nombre} {user.ApellidoM}?
+                </AlertDialogBody>
+
+                <AlertDialogFooter>
+                  <Button onClick={handleCancelDelet}>Cancelar</Button>
+                  <Button colorScheme="red" onClick={handleDeletUser} ml={3}>
+                    Eliminar
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialogOverlay>
+          </AlertDialog>
+        )}
     </Box>
   );
 };
