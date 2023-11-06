@@ -42,7 +42,7 @@ const GeoloContainer = ({
   useEffect(() => {
     if (userInput.length > 3) {
       fetch(
-        `http://www.mapquestapi.com/search/v3/prediction?limit=5&collection=adminArea,poi,address&key=${apiKey}&q=${userInput}`
+        `https://www.mapquestapi.com/search/v3/prediction?limit=5&collection=adminArea,poi,address&key=${apiKey}&q=${userInput}`
       )
         .then((response) => response.json())
         .then((data) => {
