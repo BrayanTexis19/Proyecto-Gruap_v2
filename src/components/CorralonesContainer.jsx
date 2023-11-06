@@ -102,7 +102,7 @@ const CorralonesContainer = () => {
   useEffect(() => {
     if (form.Direccion != "") {
       fetch(
-        `http://www.mapquestapi.com/search/v3/prediction?limit=5&collection=adminArea,poi,address&key=${apiKey}&q=${form.Direccion}`
+        `https://www.mapquestapi.com/search/v3/prediction?limit=5&collection=adminArea,poi,address&key=${apiKey}&q=${form.Direccion}`
       )
         .then((response) => response.json())
         .then((data) => {
