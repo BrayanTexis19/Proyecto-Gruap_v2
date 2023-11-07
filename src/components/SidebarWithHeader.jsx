@@ -48,13 +48,13 @@ const LinkItemsOld = [
 ];
 
 const SidebarContent = ({ userData, onClose, ...rest }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!userData) {
-      navigate("/login");
-    }
-  }, [userData, navigate]);
+  // useEffect(() => {
+  //   if (!userData) {
+  //     navigate("/login");
+  //   }
+  // }, [userData, navigate]);
 
   return (
     <Box
@@ -141,15 +141,17 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
     <Flex
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 4 }}
+      borderColor="blue.500"
       height="20"
       alignItems="center"
-      bg={useColorModeValue("white", "gray.900")}
+      bgGradient="linear(to-t, blue.500, blue.400)"
+      // bg={useColorModeValue("blue.400", "white")}
       borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue("gray.200", "gray.700")}
+      borderBottomColor={useColorModeValue("white", "gray.700")}
       justifyContent={{ base: "space-between", md: "flex-between" }}
       {...rest}
     >
-      <Text fontWeight="semibold" fontSize="larger">
+      <Text fontWeight="semibold" color="white" fontSize="larger">
         Dashboard
       </Text>
       <IconButton
@@ -171,9 +173,10 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
 
       <HStack
         spacing={{ base: "0", md: "6" }}
-        _hover={{ bg: "blue.200" }}
+        _hover={{ bg: "blue.300" }}
         p="1.5"
         borderRadius="base"
+        boxShadow="lg"
       >
         {/* <IconButton size="lg" variant="ghost" aria-label="open menu" color="white" icon={<FiBell />} /> */}
         <Flex alignItems={"center"}>
@@ -193,17 +196,17 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
                 >
                   {userData && (
                     <Box>
-                      <Text fontSize="sm" color="blackAlpha.900">
+                      <Text fontSize="sm" color="white">
                         {userData.Nombre} {userData.ApellidoP}
                       </Text>
-                      <Text fontSize="xs" color="blackAlpha.800">
+                      <Text fontSize="xs" color="white">
                         {userData.Rol}
                       </Text>
                     </Box>
                   )}
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
-                  <FiChevronDown color="black" />
+                  <FiChevronDown color="white" />
                 </Box>
               </HStack>
             </MenuButton>
@@ -211,7 +214,7 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
               bg={useColorModeValue("white", "gray.900")}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              <MenuItem onClick={handleDeletSesion} _hover={{ bg: "blue.200" }}>
+              <MenuItem onClick={handleDeletSesion} _hover={{ bg: "blue.300" }}>
                 Cerra Sesión
               </MenuItem>
             </MenuList>
@@ -223,11 +226,19 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
 };
 
 const SidebarWithHeader = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [control, setcontrol] = useState(false)
   const [userData, setUserData] = useState(
     JSON.parse(window.localStorage.getItem("sessionUser"))
   );
   const navigate = useNavigate();
+
+  const onCloseControl = () => {
+    setcontrol(false);
+  } 
+
+  const onOpenControl = () => {
+    setcontrol(true);
+  } 
 
   useEffect(() => {
     if (!userData) {
@@ -244,28 +255,30 @@ const SidebarWithHeader = () => {
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent
-        onClose={onClose}
+        onClose={onCloseControl}
         userData={userData}
         display={{ base: "none", md: "block" }}
       />
       <Drawer
-        isOpen={isOpen}
+        isOpen={control}
         placement="left"
-        onClose={onClose}
+        onClose={onCloseControl}
         returnFocusOnClose={false}
-        onOverlayClick={onClose}
+        onOverlayClick={onCloseControl}
         size="full"
       >
         <DrawerContent>
-          <SidebarContent onClose={onClose} />
+          <SidebarContent userData={userData} onClose={onCloseControl} />
         </DrawerContent>
       </Drawer>
 
-      <MobileNav
-        onOpen={onOpen}
-        userData={userData}
-        handleDeletSesion={handleDeletSesion}
-      />
+      {!control && (
+            <MobileNav
+            onOpen={onOpenControl}
+            userData={userData}
+            handleDeletSesion={handleDeletSesion}
+          />
+      )}
       <Box ml={{ base: 0, md: 60 }} p="1">
         <Outlet />
       </Box>

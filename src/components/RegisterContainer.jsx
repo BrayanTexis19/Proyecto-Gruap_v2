@@ -135,6 +135,7 @@ const RegisterContainer = () => {
   };
 
   const handleRegisterNewCostos = async () => {
+    const totalCargo = costos.cost1 + costos.cost2 + costos.cost3;
     const isValid = validateFormCostos();
     if (isValid) {
       const editElement = {
@@ -168,10 +169,10 @@ const RegisterContainer = () => {
           Longitud: Registro.CorralonAsignado.Longitud,
         },
         Costos: {
-          Distancia: costos.cost1,
-          Estancia: costos.cost2,
-          Maniobras: costos.cost3,
-          Total: costos.cost1 + costos.cost2 + costos.cost3,
+          Distancia: costos.cost1.toFixed(2),
+          Estancia: costos.cost2.toFixed(2),
+          Maniobras: costos.cost3.toFixed(2),
+          Total: totalCargo.toFixed(2),
         },
         Status: "1",
       };
@@ -277,7 +278,7 @@ const RegisterContainer = () => {
           setForm(initialForm);
           getData();
           setMostrarModal(false);
-          showToast(
+          return showToast(
             "Liberación Registrada",
             "El registro ha sido liberado.",
             "success"
@@ -338,14 +339,14 @@ const RegisterContainer = () => {
       if (e.target.value === "") return setCostos({ ...costos, cost2: 0 });
       setCostos({
         ...costos,
-        cost2: parseInt(e.target.value) * 50,
+        cost2: parseInt(e.target.value) * 40,
       });
     }
     if (e.target.name === "Maniobras") {
       if (e.target.value === "") return setCostos({ ...costos, cost3: 0 });
       setCostos({
         ...costos,
-        cost3: parseInt(e.target.value) * 120,
+        cost3: parseInt(e.target.value) * 50,
       });
     }
   };

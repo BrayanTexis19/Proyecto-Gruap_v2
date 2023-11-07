@@ -26,7 +26,7 @@ const HomePage = () => {
                   h="auto"
                   w="30%"
                   borderRadius="base"
-                  boxShadow="md"
+                  boxShadow="lg"
                 >
                   <Box
                     display="flex"
@@ -61,7 +61,7 @@ const HomePage = () => {
                   h="auto"
                   w="30%"
                   borderRadius="base"
-                  boxShadow="md"
+                  boxShadow="lg"
                 >
                   <Box
                     display="flex"
@@ -96,7 +96,7 @@ const HomePage = () => {
                   h="auto"
                   w="30%"
                   borderRadius="base"
-                  boxShadow="md"
+                  boxShadow="lg"
                 >
                   <Box
                     display="flex"
@@ -131,7 +131,7 @@ const HomePage = () => {
                   h="auto"
                   w="30%"
                   borderRadius="base"
-                  boxShadow="md"
+                  boxShadow="lg"
                 >
                   <Box
                     display="flex"

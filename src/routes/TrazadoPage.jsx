@@ -67,6 +67,7 @@ const TrazadoPage = () => {
   const navigate = useNavigate();
 
   const handleClicNewRegister = async () => {
+    const CostoDistancia = parseInt(distance) * .15
     const result = await RecordCount("Registros");
     const formattedNumber = (result + 1).toString().padStart(4, "0");
     const NewElement = {
@@ -99,7 +100,7 @@ const TrazadoPage = () => {
         Longitud: closestDirection[0].longitude,
       },
       Costos: {
-        Distancia: parseInt(distance) * .3,
+        Distancia: CostoDistancia.toFixed(2),
         Estancia: "",
         Maniobras: "",
       },
@@ -109,6 +110,7 @@ const TrazadoPage = () => {
     console.log(JSON.stringify(res));
     setForm(initialForm);
     setUserInput("");
+    setDistance(null);
     setClosestDirection(null);
     setlocationUser(null);
     navigate("/Registros")
