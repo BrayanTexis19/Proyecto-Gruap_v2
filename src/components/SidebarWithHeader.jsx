@@ -48,14 +48,6 @@ const LinkItemsOld = [
 ];
 
 const SidebarContent = ({ userData, onClose, ...rest }) => {
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   if (!userData) {
-  //     navigate("/login");
-  //   }
-  // }, [userData, navigate]);
-
   return (
     <Box
       transition="3s ease"
@@ -88,14 +80,14 @@ const SidebarContent = ({ userData, onClose, ...rest }) => {
         (userData.Rol === "Admin"
           ? LinkItems.map((link, index) => (
               <Link key={index} to={link.url}>
-                <NavItem key={link.name} icon={link.icon}>
+                <NavItem key={link.name} icon={link.icon} onClick={onClose}>
                   {link.name}
                 </NavItem>
               </Link>
             ))
           : LinkItemsOld.map((link, index) => (
               <Link key={index} to={link.url}>
-                <NavItem key={link.name} icon={link.icon}>
+                <NavItem key={link.name} icon={link.icon} onClick={onClose}>
                   {link.name}
                 </NavItem>
               </Link>
@@ -145,7 +137,6 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
       height="20"
       alignItems="center"
       bgGradient="linear(to-t, blue.500, blue.400)"
-      // bg={useColorModeValue("blue.400", "white")}
       borderBottomWidth="1px"
       borderBottomColor={useColorModeValue("white", "gray.700")}
       justifyContent={{ base: "space-between", md: "flex-between" }}
@@ -156,6 +147,8 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
       </Text>
       <IconButton
         display={{ base: "flex", md: "none" }}
+        color="gray.400"
+        bg="white"
         onClick={onOpen}
         variant="outline"
         aria-label="open menu"
@@ -167,6 +160,7 @@ const MobileNav = ({ userData, handleDeletSesion, onOpen, ...rest }) => {
         fontSize="2xl"
         fontFamily="monospace"
         fontWeight="bold"
+        color={{base: "white", md: "white"}}
       >
         GruApp
       </Text>

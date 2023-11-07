@@ -168,12 +168,12 @@ const LoginContainer = () => {
         bgGradient="linear(to-l, blue.500, blue.400, blue.600)"
       >
         <Box
-          position="sticky"
           display="flex"
+          flexDir={{base: "column", sm:"column", md:"row"}}
           justifyContent="space-between"
           alignItems="center"
-          gap="5"
-          h="12vh"
+          gap={{base: "3", sm:"3", md:"5"}}
+          h="auto"
           w="full"
           p="4"
           bg="whiteAlpha.500"
@@ -182,7 +182,7 @@ const LoginContainer = () => {
         >
           <Box
             display="flex"
-            gap="3"
+            gap={{ base:"2", sm:"3", md:"2"}}
             alignItems="center"
             justifyContent="center"
           >
@@ -194,11 +194,11 @@ const LoginContainer = () => {
               align="logo"
               borderRadius="full"
             />
-            <Heading size="xl" fontWeight="extrabold" color="white" pl="5">
+            <Heading size="xl" fontWeight="extrabold" color="white" pl={{ base: "1", sm: "1", md:"2"}}>
               GruApp
             </Heading>
           </Box>
-          <Box display="flex" gap="3">
+          <Box display="flex" flexDir={{base:"column", sm:"column", md:"row"}} gap="3">
             <Button
               onClick={handleClickSearch}
               boxShadow="lg"
@@ -239,15 +239,15 @@ const LoginContainer = () => {
         </Box>
         <Box
           display="flex"
-          justifyContent="space-between"
+          justifyContent={{base: "center", sm:"center", md:"space-between"}}
           alignItems="center"
-          h="80vh"
+          h={{base:"auto", md:"80vh"}}
           width="90%"
         >
-          <Center h="auto" w="50%" p={5} mx="2" borderLeftRadius="base">
+          <Center h="auto" w="50%" p={5} mx="2" display={{base: "none", sm: "none", md:"block"}}>
             <Image
               w="100%"
-              h="auto"
+              h="100%"
               src={marker}
               alt="Fondo1"
               objectFit="cover"
@@ -255,7 +255,7 @@ const LoginContainer = () => {
           </Center>
           <Box
             h="auto"
-            w="40%"
+            w={{base: "100%", md:"40%"}}
             bg="whiteAlpha.900"
             borderRadius="base"
             boxShadow="2xl"
