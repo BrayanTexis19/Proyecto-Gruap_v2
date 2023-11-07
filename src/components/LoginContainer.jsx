@@ -11,7 +11,13 @@ import {
   Badge,
   InputRightElement,
 } from "@chakra-ui/react";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+} from "@chakra-ui/react";
 import {
   Box,
   Center,
@@ -34,6 +40,7 @@ import marker from "../assets/gruapp_rc_2.svg";
 import logo from "../assets/gruapp.jpg";
 import { Icon } from "@chakra-ui/react";
 import { MdPerson, MdSearch, MdSecurity } from "react-icons/md";
+import { FaCar, FaMapMarkedAlt, FaMapMarker, FaMapMarkerAlt, FaPiggyBank } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getRegisterInfo, userExists } from "../firebase/firebase";
 import { useState, useEffect } from "react";
@@ -169,10 +176,10 @@ const LoginContainer = () => {
       >
         <Box
           display="flex"
-          flexDir={{base: "column", sm:"column", md:"row"}}
+          flexDir={{ base: "column", sm: "column", md: "row" }}
           justifyContent="space-between"
           alignItems="center"
-          gap={{base: "3", sm:"3", md:"5"}}
+          gap={{ base: "3", sm: "3", md: "5" }}
           h="auto"
           w="full"
           p="4"
@@ -182,7 +189,7 @@ const LoginContainer = () => {
         >
           <Box
             display="flex"
-            gap={{ base:"2", sm:"3", md:"2"}}
+            gap={{ base: "2", sm: "3", md: "2" }}
             alignItems="center"
             justifyContent="center"
           >
@@ -194,11 +201,20 @@ const LoginContainer = () => {
               align="logo"
               borderRadius="full"
             />
-            <Heading size="xl" fontWeight="extrabold" color="white" pl={{ base: "1", sm: "1", md:"2"}}>
+            <Heading
+              size="xl"
+              fontWeight="extrabold"
+              color="white"
+              pl={{ base: "1", sm: "1", md: "2" }}
+            >
               GruApp
             </Heading>
           </Box>
-          <Box display="flex" flexDir={{base:"column", sm:"column", md:"row"}} gap="3">
+          <Box
+            display="flex"
+            flexDir={{ base: "column", sm: "column", md: "row" }}
+            gap="3"
+          >
             <Button
               onClick={handleClickSearch}
               boxShadow="lg"
@@ -239,12 +255,18 @@ const LoginContainer = () => {
         </Box>
         <Box
           display="flex"
-          justifyContent={{base: "center", sm:"center", md:"space-between"}}
+          justifyContent={{ base: "center", sm: "center", md: "space-between" }}
           alignItems="center"
-          h={{base:"auto", md:"80vh"}}
+          h={{ base: "auto", md: "80vh" }}
           width="90%"
         >
-          <Center h="auto" w="50%" p={5} mx="2" display={{base: "none", sm: "none", md:"block"}}>
+          <Center
+            h="auto"
+            w="50%"
+            p={5}
+            mx="2"
+            display={{ base: "none", sm: "none", md: "block" }}
+          >
             <Image
               w="100%"
               h="100%"
@@ -254,9 +276,9 @@ const LoginContainer = () => {
             />
           </Center>
           <Box
-            mt={{base: "3", md:"0"}}
+            mt={{ base: "3", md: "0" }}
             h="auto"
-            w={{base: "100%", md:"40%"}}
+            w={{ base: "100%", md: "40%" }}
             bg="whiteAlpha.900"
             borderRadius="base"
             boxShadow="2xl"
@@ -335,7 +357,7 @@ const LoginContainer = () => {
           <Drawer onClose={handleClicOnClose} isOpen={isOpen} size="lg">
             <DrawerOverlay />
             <DrawerContent>
-              <DrawerCloseButton />
+              <DrawerCloseButton color="white" />
               <DrawerHeader bg="blue.500" color="white">
                 <Heading textAlign="center">Detalles</Heading>
               </DrawerHeader>
@@ -345,7 +367,7 @@ const LoginContainer = () => {
                   display="flex"
                   justifyContent="center"
                   alignItems="center"
-                  p="5"
+                  p={{ base: "1", md: "5" }}
                   mt="4"
                   border="1px"
                   borderColor="gray.200"
@@ -353,7 +375,11 @@ const LoginContainer = () => {
                 >
                   {/* {folioData != null ? ( */}
                   <Box w="full">
-                    <Box display="flex" gap="2">
+                    <Box
+                      display="flex"
+                      flexDir={{ base: "column", md: "row" }}
+                      gap="2"
+                    >
                       <Box
                         w="full"
                         display="flex"
@@ -407,56 +433,31 @@ const LoginContainer = () => {
                         <Text>{folioData.FechaSalida}</Text>
                       )}
                     </Box>
-                    <Tabs w="full" isFitted variant="unstyled" pt="3">
-                      <TabList mb="1em">
-                        <Tab
-                          _selected={{
-                            boxShadow: "lg",
-                            color: "white",
-                            bg: "blue.400",
-                            borderRadius: "base",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Detalles Vehiculo
-                        </Tab>
-                        <Tab
-                          _selected={{
-                            boxShadow: "lg",
-                            color: "white",
-                            bg: "blue.400",
-                            borderRadius: "base",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Origen
-                        </Tab>
-                        <Tab
-                          _selected={{
-                            boxShadow: "lg",
-                            color: "white",
-                            bg: "blue.400",
-                            borderRadius: "base",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Corralón Asignado
-                        </Tab>
-                        <Tab
-                          _selected={{
-                            boxShadow: "lg",
-                            color: "white",
-                            bg: "blue.400",
-                            borderRadius: "base",
-                            fontWeight: "bold",
-                          }}
-                          isDisabled={folioData.Costos.Estancia === ""}
-                        >
-                          Costos
-                        </Tab>
-                      </TabList>
-                      <TabPanels>
-                        <TabPanel w="full">
+                    <Accordion mt="2" defaultIndex={[0]} allowMultiple>
+                      <AccordionItem>
+                        <h2>
+                          <AccordionButton
+                            gap={3}
+                            borderRadius="base"
+                            bg="blue.400"
+                            _hover={{ bg: "blue.500" }}
+                            _expanded={{ bg: "blue.500" }}
+                          >
+                            <FaCar color="white" />
+                            <Box
+                              color="white"
+                              fontSize="lg"
+                              fontWeight="bold"
+                              as="span"
+                              flex="1"
+                              textAlign="left"
+                            >
+                              Detalles Vehiculo
+                            </Box>
+                            <AccordionIcon color="white" />
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel  boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
                           <Box display="flex" flexDir="column" gap="1" w="full">
                             <Box
                               w="full"
@@ -471,9 +472,10 @@ const LoginContainer = () => {
                             <Box
                               w="full"
                               display="flex"
+                              flexDir={{ base: "column", md: "row" }}
                               gap="2"
                               justifyContent="flex-start"
-                              alignItems="center"
+                              alignItems={{base: "start" ,md:"center"}}
                             >
                               <Badge>Descripcion:</Badge>
                               <Text>
@@ -491,25 +493,52 @@ const LoginContainer = () => {
                               <Text>{folioData.DetallesAutomovil.NPlaca}</Text>
                             </Box>
                           </Box>
-                        </TabPanel>
-                        <TabPanel>
-                          <Box
+                        </AccordionPanel>
+                      </AccordionItem>
+
+                      <AccordionItem>
+                        <h2>
+                          <AccordionButton
+                            gap={3}
+                            borderRadius="base"
+                            bg="blue.400"
+                            _hover={{ bg: "blue.500" }}
+                            _expanded={{ bg: "blue.500" }}
+                          >
+                            <FaMapMarkedAlt color="white" />
+                            <Box
+                              as="span"
+                              color="white"
+                              fontSize="lg"
+                              fontWeight="bold"
+                              flex="1"
+                              textAlign="left"
+                            >
+                              Lugar de Origen
+                            </Box>
+                            <AccordionIcon color="white" />
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel  boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
+                        <Box
                             w="full"
                             display="flex"
+                            flexDir={{ base: "column", md: "row" }}
+                            alignItems={{base: "start" ,md:"center"}}
                             gap="2"
                             justifyContent="flex-start"
-                            alignItems="center"
                           >
                             <Badge>Dirección:</Badge>
                             <Text>{folioData.Origen.Direccion}</Text>
                           </Box>
                           <Box
                             display="flex"
+                            flexDir={{ base: "column", md: "row" }}
                             gap="1"
                             w="full"
                             justifyContent="center"
                             alignItems="center"
-                            mt="3"
+                            mt={{ base: "1",md:"3"}}
                           >
                             <Box
                               w="full"
@@ -568,31 +597,58 @@ const LoginContainer = () => {
                                 <Text>{folioData.Origen.Longitud}</Text>
                               </Box>
                             </Box>
-                            <Box w="full" borderRadius="lg">
+                            <Box w="full" h={{base: "25vh", md: "50vh"}} borderRadius="lg">
                               <MapViewFolio
                                 latitud={folioData.Origen.Latitud}
                                 longitud={folioData.Origen.Longitud}
                               />
                             </Box>
                           </Box>
-                        </TabPanel>
-                        <TabPanel>
-                          <Box
+                        </AccordionPanel>
+                      </AccordionItem>
+
+                      <AccordionItem>
+                        <h2>
+                          <AccordionButton
+                            gap={3}
+                            borderRadius="base"
+                            bg="blue.400"
+                            _hover={{ bg: "blue.500" }}
+                            _expanded={{ bg: "blue.500" }}
+                          >
+                            <FaMapMarkerAlt color="white" />
+                            <Box
+                              as="span"
+                              color="white"
+                              fontSize="lg"
+                              fontWeight="bold"
+                              flex="1"
+                              textAlign="left"
+                            >
+                              Corralon Asignado
+                            </Box>
+                            <AccordionIcon color="white" />
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel  boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
+                        <Box
                             w="full"
                             display="flex"
+                            flexDir={{ base: "column", md: "row" }}
+                            alignItems={{base: "start" ,md:"center"}}
                             gap="2"
                             justifyContent="flex-start"
-                            alignItems="center"
                           >
                             <Badge>Dirección:</Badge>
                             <Text>{folioData.CorralonAsignado.Direccion}</Text>
                           </Box>
                           <Box
                             display="flex"
+                            flexDir={{ base: "column", md: "row" }}
+                            alignItems={{base: "start" ,md:"center"}}
                             gap="1"
                             w="full"
                             justifyContent="center"
-                            alignItems="center"
                             mt="3"
                           >
                             <Box
@@ -682,16 +738,41 @@ const LoginContainer = () => {
                                 </Text>
                               </Box>
                             </Box>
-                            <Box w="full" borderRadius="lg">
+                            <Box w="full" h={{ base:"10vh", md:"50vh"}} borderRadius="lg">
                               <MapViewFolio
                                 latitud={folioData.CorralonAsignado.Latitud}
                                 longitud={folioData.CorralonAsignado.Longitud}
                               />
                             </Box>
                           </Box>
-                        </TabPanel>
-                        <TabPanel>
-                          <Box px="8">
+                        </AccordionPanel>
+                      </AccordionItem>
+
+                      <AccordionItem>
+                        <h2>
+                          <AccordionButton
+                            gap={3}
+                            borderRadius="base"
+                            bg="blue.400"
+                            _hover={{ bg: "blue.500" }}
+                            _expanded={{ bg: "blue.500" }}
+                          >
+                            <FaPiggyBank color="white" />
+                            <Box
+                              as="span"
+                              color="white"
+                              fontSize="lg"
+                              fontWeight="bold"
+                              flex="1"
+                              textAlign="left"
+                            >
+                              Costos
+                            </Box>
+                            <AccordionIcon color="white" />
+                          </AccordionButton>
+                        </h2>
+                        <AccordionPanel boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
+                          <Box px={{base: "0", md:"8"}}>
                             <Box>
                               <Text
                                 textAlign="center"
@@ -743,9 +824,9 @@ const LoginContainer = () => {
                               </Text>
                             </Box>
                           </Box>
-                        </TabPanel>
-                      </TabPanels>
-                    </Tabs>
+                        </AccordionPanel>
+                      </AccordionItem>
+                    </Accordion>
                   </Box>
                 </Box>
               </DrawerBody>

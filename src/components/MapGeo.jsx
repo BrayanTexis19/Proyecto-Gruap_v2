@@ -13,7 +13,6 @@ const MapGeo = ({locationUser, closestDirection, setDistance}) => {
 
   return (
     <>
-        {/* <Box bg="white" w="100%" h="100%"> */}
             <MapContainer center={PositionPuebla} zoom={13} style={{ height: '100%', width: '100%' }} >
             <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -33,7 +32,6 @@ const MapGeo = ({locationUser, closestDirection, setDistance}) => {
                 />
             )}
             </MapContainer>
-        {/* </Box> */}
     </>
   )
 }
