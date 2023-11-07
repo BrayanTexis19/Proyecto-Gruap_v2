@@ -74,7 +74,7 @@ const LoginContainer = () => {
   }, [messageErrorF]);
 
   const handleClickSearch = () => {
-    setDisplay(true);
+    setDisplay(!display);
   };
 
   const handleSearch = async () => {
@@ -254,6 +254,7 @@ const LoginContainer = () => {
             />
           </Center>
           <Box
+            mt={{base: "3", md:"0"}}
             h="auto"
             w={{base: "100%", md:"40%"}}
             bg="whiteAlpha.900"

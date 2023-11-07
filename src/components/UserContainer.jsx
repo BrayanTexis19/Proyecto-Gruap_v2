@@ -286,7 +286,9 @@ const UserContainer = () => {
     <Box h="auto" w="auto" bg="white">
       <Box
         display="flex"
-        p="5"
+        flexDir={{ base: "column", md: "row" }}
+        gap={{base: "2", md:"0"}}
+        p={{ base: "2", md:"5"}}
         justifyContent="space-between"
         alignItems="center"
       >
@@ -309,7 +311,7 @@ const UserContainer = () => {
         alignItems="flex-start"
         w="full"
         h="auto"
-        p="4"
+        p="3"
       >
         <DataTable
           data={data1}

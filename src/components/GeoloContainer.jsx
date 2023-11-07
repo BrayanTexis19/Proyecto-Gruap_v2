@@ -62,7 +62,7 @@ const GeoloContainer = ({
   }, [userInput, apiKey]);
 
   return (
-    <Box h="100vh" w="100%" display="flex" justifyContent={"center"}>
+    <Box h={{base:"75vh", md:"100vh"}} w="100%" display="flex" flexDir={{base: "column", md:"row"}} justifyContent={"center"}>
       <MapGeo
         locationUser={locationUser}
         closestDirection={closestDirection}

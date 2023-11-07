@@ -50,19 +50,20 @@ const FormDetailsAuto = ({ setActiveStep, handleChange, form }) => {
       flexDir="column"
       justifyContent="center"
       alignItems="center"
-      mt="4"
+      p="2"
+      w="auto"
     >
       <Box
-        w="70%"
+        w={{ base: "100%", md:"80%"}}
         h="auto"
         bg="whiteAlpha.900"
         border="2px"
         borderColor="gray.100"
         p="4"
-        boxShadow="md"
+        boxShadow="lg"
       >
         <Heading size="md">Detalles del Vehiculo</Heading>
-        <Box display="flex" gap="3">
+        <Box display="flex" flexDir={{base: "column", md: "row"}} gap="3">
           <FormControl mt="2" isRequired>
             <FormLabel>Cantidad de Vehiculos</FormLabel>
             <Input

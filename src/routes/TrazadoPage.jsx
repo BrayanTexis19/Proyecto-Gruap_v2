@@ -126,8 +126,8 @@ const TrazadoPage = () => {
   const RenderContent = ViewSteps[activeStep];
 
   return (
-    <Box bg="white" w="full" h="auto">
-      <Stepper size="md" index={activeStep} p="3">
+    <Box bg="white" w="full" h="auto" scrollBehavior="inside">
+      <Stepper size={{base: "sm", md:"md"}} index={activeStep} p="3">
         {steps.map((step, index) => (
           <Step key={index}>
             <StepIndicator>

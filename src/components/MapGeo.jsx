@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
-import { Box } from "@chakra-ui/react"
+// import { Box } from "@chakra-ui/react"
 import "leaflet/dist/leaflet.css";
 import RouteMap from "./RouteMap";
 import municipios from "../assets/Municipios.js";
@@ -13,7 +13,7 @@ const MapGeo = ({locationUser, closestDirection, setDistance}) => {
 
   return (
     <>
-        <Box bg="white" w="100%" h="100%">
+        {/* <Box bg="white" w="100%" h="100%"> */}
             <MapContainer center={PositionPuebla} zoom={13} style={{ height: '100%', width: '100%' }} >
             <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -33,7 +33,7 @@ const MapGeo = ({locationUser, closestDirection, setDistance}) => {
                 />
             )}
             </MapContainer>
-        </Box>
+        {/* </Box> */}
     </>
   )
 }

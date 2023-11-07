@@ -247,7 +247,7 @@ const SidebarWithHeader = () => {
   };
 
   return (
-    <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
+    <Box minH="100vh" bg={useColorModeValue("white", "white")}>
       <SidebarContent
         onClose={onCloseControl}
         userData={userData}
@@ -273,7 +273,7 @@ const SidebarWithHeader = () => {
             handleDeletSesion={handleDeletSesion}
           />
       )}
-      <Box ml={{ base: 0, md: 60 }} p="1">
+      <Box ml={{ base: 0, md: 60 }} p="1" bg="white">
         <Outlet />
       </Box>
     </Box>

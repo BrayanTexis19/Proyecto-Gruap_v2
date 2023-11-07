@@ -11,9 +11,9 @@ const HomePage = () => {
     JSON.parse(window.localStorage.getItem("sessionUser"))
   );
   return (
-    <Box w="full" minH="80vh" bg="white">
+    <Box w="full" h="auto" bg="white" mt="1">
       <Heading size="lg" fontWeight="medium" p="2">Menu de opciones:</Heading>
-      <Box display="flex" p="2" gap="3" flexWrap="wrap">
+      <Box display="flex" flexDir={{base: "column", md:"row"}} p="2" gap="3" flexWrap="wrap">
         {userData && (
              userData.Rol === "Admin" ? (
               <>
@@ -24,7 +24,7 @@ const HomePage = () => {
                   p="4"
                   color="white"
                   h="auto"
-                  w="30%"
+                  w={{base: "100%", md: "30%"}}
                   borderRadius="base"
                   boxShadow="lg"
                 >
@@ -34,7 +34,7 @@ const HomePage = () => {
                     alignItems="center"
                   >
                     <Text fontSize="xl">Usuarios</Text>
-                    <MdSupervisedUserCircle size="30" />
+                    <MdSupervisedUserCircle size="30px" />
                   </Box>
                   <Box display="flex" flexDir="column" gap="2" p="2">
                     <Text fontSize="sm" fontWeight="light">
@@ -59,7 +59,7 @@ const HomePage = () => {
                   p="4"
                   color="white"
                   h="auto"
-                  w="30%"
+                  w={{base: "100%", md: "30%"}}
                   borderRadius="base"
                   boxShadow="lg"
                 >
@@ -94,7 +94,7 @@ const HomePage = () => {
                   p="4"
                   color="white"
                   h="auto"
-                  w="30%"
+                  w={{base: "100%", md: "30%"}}
                   borderRadius="base"
                   boxShadow="lg"
                 >
@@ -129,7 +129,7 @@ const HomePage = () => {
                   p="4"
                   color="white"
                   h="auto"
-                  w="30%"
+                  w={{base: "100%", md: "30%"}}
                   borderRadius="base"
                   boxShadow="lg"
                 >
@@ -167,7 +167,7 @@ const HomePage = () => {
                   p="4"
                   color="white"
                   h="auto"
-                  w="30%"
+                  w={{base: "100%", md: "30%"}}
                   borderRadius="base"
                   boxShadow="md"
                 >
@@ -202,7 +202,7 @@ const HomePage = () => {
                   p="4"
                   color="white"
                   h="auto"
-                  w="30%"
+                  w={{base: "100%", md: "30%"}}
                   borderRadius="base"
                   boxShadow="md"
                 >
