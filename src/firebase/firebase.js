@@ -11,7 +11,6 @@ import {
   addDoc,
   setDoc,
   deleteDoc,
-  getDoc
 
 } from "firebase/firestore";
 
@@ -101,13 +100,10 @@ export async function RecordCount(refTable) {
 }
 
 
-export async function getRegisterInfo(Folio) {
-  //const docRef = doc(db, "Registros", Folio);
-  //const docSnap = await getDoc(docRef);
-  //return docSnap.data();
+export async function getRegisterInfo(ref) {
   let Registro = null;
     try {
-        const q = query(collection(db, "Registros"), where("Folio", "==", Folio));
+        const q = query(collection(db, "Registros"), where("DetallesAutomovil.NPlaca", "==", ref));
         const querySnapshot = await getDocs(q);
   
         querySnapshot.forEach((doc) => { 

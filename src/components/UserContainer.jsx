@@ -10,6 +10,10 @@ import {
   Input,
   Badge,
   FormErrorMessage,
+  InputGroup,
+  InputLeftElement,
+  Icon,
+  InputRightElement,
 } from "@chakra-ui/react";
 import DataTable from "react-data-table-component";
 import { FiUserPlus, FiTrash2, FiEdit } from "react-icons/fi";
@@ -40,6 +44,8 @@ import {
 } from "../firebase/firebase";
 import { v4 as uuid } from "uuid";
 import { useToast } from "@chakra-ui/react";
+import { MdSearch } from "react-icons/md";
+import CustomLoader from "./CustomLoader";
 
 const initailForm = {
   Nombre: "",
@@ -59,18 +65,32 @@ const UserContainer = () => {
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const [filterText, setFilterText] = useState("");
+  const [pending, setPending] = useState(true);
+  const [isFilter, setisFilter] = useState(false)
   const initialRef = useRef(null);
   const finalRef = useRef(null);
   const toast = useToast();
 
   useEffect(() => {
-    getData();
+    const timeout = setTimeout(() => {
+      getData();
+    }, 1000);
+    return () => clearTimeout(timeout);
   }, []);
+
+  const filteredData = filterText
+    ? data1.filter((item) =>
+        item.Nombre.toLowerCase().includes(filterText.toLowerCase())
+      )
+    : data1;
+  console.log(filteredData, filterText.toLowerCase());
 
   async function getData() {
     try {
       const datos = await ObtenerDataDB("Usuarios");
       setdata1(datos);
+      setPending(false);
     } catch (error) {
       console.log(error);
     }
@@ -90,29 +110,29 @@ const UserContainer = () => {
 
   const validateForm = () => {
     const errors = {};
-  
+
     if (!form.Nombre.trim()) {
       errors.Nombre = "El campo Nombre es obligatorio";
     }
 
     if (!form.ApellidoP.trim()) {
       errors.ApellidoP = "El campo Apellido Paterno es obligatorio";
-    } 
+    }
 
     if (!form.ApellidoM.trim()) {
       errors.ApellidoM = "El campo Apellido Materno es obligatorio";
-    } 
-  
+    }
+
     if (!form.Correo.trim()) {
       errors.Correo = "El campo Correo es obligatorio";
-    } 
+    }
 
     if (!form.Password.trim()) {
       errors.Password = "El campo Contraseña es obligatorio";
-    } 
-  
+    }
+
     setValidationErrors(errors);
-  
+
     return Object.keys(errors).length === 0; // Devuelve true si no hay errores
   };
 
@@ -134,10 +154,18 @@ const UserContainer = () => {
       setForm(initailForm);
       getData();
       onClose();
-  
-      showToast("Usuario Registrado", "El usuario ha sido registrado.", "success");
+
+      showToast(
+        "Usuario Registrado",
+        "El usuario ha sido registrado.",
+        "success"
+      );
     } else {
-      showToast("Error de validación", "Por favor, corrige los errores en el formulario.", "error");
+      showToast(
+        "Error de validación",
+        "Por favor, corrige los errores en el formulario.",
+        "error"
+      );
     }
   };
 
@@ -175,19 +203,19 @@ const UserContainer = () => {
   };
 
   const handleDeletUser = async () => {
-    console.log(user)
+    console.log(user);
     const res = await DeleteElement("Usuarios", user.docId);
     console.log("registro eliminado:", res);
     setIsDelet(false);
     getData();
     setUser(null);
     showToast("Usuario Eliminado", "El usuario ha sido eliminado.", "success");
-   };
-  
+  };
+
   const handleCancelDelet = () => {
     setUser(null);
-    setIsDelet(false)
-  }
+    setIsDelet(false);
+  };
 
   const handleClicUpdateUser = async () => {
     const isValid = validateForm();
@@ -209,14 +237,17 @@ const UserContainer = () => {
       getData();
       onClose();
     } else {
-      showToast("Error de validación", "Por favor, corrige los errores en el formulario.", "error");
+      showToast(
+        "Error de validación",
+        "Por favor, corrige los errores en el formulario.",
+        "error"
+      );
     }
-  
   };
 
   const handleClicOnClose = () => {
     setForm(initailForm);
-    setValidationErrors({})
+    setValidationErrors({});
     onClose();
   };
 
@@ -287,8 +318,8 @@ const UserContainer = () => {
       <Box
         display="flex"
         flexDir={{ base: "column", md: "row" }}
-        gap={{base: "2", md:"0"}}
-        p={{ base: "2", md:"5"}}
+        gap={{ base: "2", md: "0" }}
+        p={{ base: "2", md: "5" }}
         justifyContent="space-between"
         alignItems="center"
       >
@@ -304,6 +335,45 @@ const UserContainer = () => {
           Nuevo Usuario
         </Button>
       </Box>
+      <Box
+        h="auto"
+        display="flex"
+        flexDir={{ base: "column", md: "row" }}
+        justifyContent="flex-end"
+        alignItems="center"
+        width="full"
+        gap={1}
+        pr={{ base: "0", md: "3" }}
+      >
+        <Box onClick={() => setisFilter(!isFilter)} cursor="pointer" color="white" _hover={{ bg: "blue.300" }} p={{base: "1", md:"2"}} borderRadius="base" h="auto" bg="blue.400">Filtrar datos</Box>
+        {isFilter && (
+          <InputGroup w={{ base: "50%", md: "auto" }}>
+          <InputLeftElement>
+            <Icon as={MdSearch} boxSize="5" color="gray.400" />
+          </InputLeftElement>
+          <Input
+            w="full"
+            border="2px"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            borderColor="blue.300"
+            placeholder="Escriba un nombre"
+          />
+          <InputRightElement>
+            {filterText && (
+              <Button
+                bg="blue.300"
+                _hover={{ bg: "blue.200" }}
+                color="white"
+                onClick={() => setFilterText("")}
+              >
+                x
+              </Button>
+            )}
+          </InputRightElement>
+        </InputGroup>
+        )}
+      </Box>
       <HStack
         display="flex"
         flexDir="column"
@@ -314,15 +384,18 @@ const UserContainer = () => {
         p="3"
       >
         <DataTable
-          data={data1}
+          data={filteredData}
           columns={columnsPermission}
           highlightOnHover
           pointerOnHover
           pagination
           paginationPerPage={5}
-          striped
+          fixedHeader
+          fixedHeaderScrollHeight
           responsive
           selectableRowsHighlight
+          progressPending={pending}
+          progressComponent={<CustomLoader/>}
           customStyles={customStyles}
         />
       </HStack>
@@ -355,7 +428,11 @@ const UserContainer = () => {
             </FormControl>
 
             <Box display="flex" gap="3">
-              <FormControl mt={3} isRequired isInvalid={!!validationErrors.ApellidoP}>
+              <FormControl
+                mt={3}
+                isRequired
+                isInvalid={!!validationErrors.ApellidoP}
+              >
                 <FormLabel>Apellido Paterno:</FormLabel>
                 <Input
                   name="ApellidoP"
@@ -363,12 +440,18 @@ const UserContainer = () => {
                   onChange={handleChange}
                   placeholder="Ingrese datos"
                 />
-                 {validationErrors.ApellidoP && (
-                <FormErrorMessage>{validationErrors.ApellidoP}</FormErrorMessage>
-              )}
+                {validationErrors.ApellidoP && (
+                  <FormErrorMessage>
+                    {validationErrors.ApellidoP}
+                  </FormErrorMessage>
+                )}
               </FormControl>
 
-              <FormControl mt={3} isRequired isInvalid={!!validationErrors.ApellidoM}>
+              <FormControl
+                mt={3}
+                isRequired
+                isInvalid={!!validationErrors.ApellidoM}
+              >
                 <FormLabel>Apellido Materno:</FormLabel>
                 <Input
                   name="ApellidoM"
@@ -376,13 +459,19 @@ const UserContainer = () => {
                   onChange={handleChange}
                   placeholder="Ingrese datos"
                 />
-                 {validationErrors.ApellidoM && (
-                <FormErrorMessage>{validationErrors.ApellidoM}</FormErrorMessage>
-              )}
+                {validationErrors.ApellidoM && (
+                  <FormErrorMessage>
+                    {validationErrors.ApellidoM}
+                  </FormErrorMessage>
+                )}
               </FormControl>
             </Box>
             <Box display="flex" gap="3">
-              <FormControl mt={3} isRequired isInvalid={!!validationErrors.Correo}>
+              <FormControl
+                mt={3}
+                isRequired
+                isInvalid={!!validationErrors.Correo}
+              >
                 <FormLabel>Correo:</FormLabel>
                 <Input
                   name="Correo"
@@ -395,7 +484,12 @@ const UserContainer = () => {
                 )}
               </FormControl>
 
-              <FormControl mt={3} is isRequired isInvalid={!!validationErrors.Password}>
+              <FormControl
+                mt={3}
+                is
+                isRequired
+                isInvalid={!!validationErrors.Password}
+              >
                 <FormLabel>Contraseña:</FormLabel>
                 <Input
                   name="Password"
@@ -404,8 +498,10 @@ const UserContainer = () => {
                   type="password"
                   placeholder="Ingrese datos"
                 />
-                   {validationErrors.Password && (
-                  <FormErrorMessage>{validationErrors.Password}</FormErrorMessage>
+                {validationErrors.Password && (
+                  <FormErrorMessage>
+                    {validationErrors.Password}
+                  </FormErrorMessage>
                 )}
               </FormControl>
             </Box>
@@ -449,29 +545,28 @@ const UserContainer = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {user !=
-        null && (
-          <AlertDialog isOpen={isDelet} onClose={() => setIsDelet(false)}>
-            <AlertDialogOverlay>
-              <AlertDialogContent>
-                <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                  Eliminar Usuario
-                </AlertDialogHeader>
+      {user != null && (
+        <AlertDialog isOpen={isDelet} onClose={() => setIsDelet(false)}>
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                Eliminar Usuario
+              </AlertDialogHeader>
 
-                <AlertDialogBody>
-                  ¿Deseas eliminar al usuario {user.Nombre} {user.ApellidoM}?
-                </AlertDialogBody>
+              <AlertDialogBody>
+                ¿Deseas eliminar al usuario {user.Nombre} {user.ApellidoM}?
+              </AlertDialogBody>
 
-                <AlertDialogFooter>
-                  <Button onClick={handleCancelDelet}>Cancelar</Button>
-                  <Button colorScheme="red" onClick={handleDeletUser} ml={3}>
-                    Eliminar
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialogOverlay>
-          </AlertDialog>
-        )}
+              <AlertDialogFooter>
+                <Button onClick={handleCancelDelet}>Cancelar</Button>
+                <Button colorScheme="red" onClick={handleDeletUser} ml={3}>
+                  Eliminar
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+      )}
     </Box>
   );
 };

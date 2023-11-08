@@ -8,7 +8,11 @@ import {
   FormLabel,
   HStack,
   Heading,
+  Icon,
   Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -38,6 +42,15 @@ import {
 import copy from "clipboard-copy";
 import { useToast } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
+import CustomLoader from "./CustomLoader";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+} from "@chakra-ui/react";
+import { MdSearch } from "react-icons/md";
 
 const initialForm = {
   Distancia: "",
@@ -51,11 +64,19 @@ const RegisterContainer = () => {
   const [data, setdata] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [Registro, setRegistro] = useState(null);
-  const [costos, setCostos] = useState({ cost1: 0, cost2: 0, cost3: 0, cost4: 0});
+  const [isFilter, setisFilter] = useState(false)
+  const [costos, setCostos] = useState({
+    cost1: 0,
+    cost2: 0,
+    cost3: 0,
+    cost4: 0,
+  });
   const [mostrarModal, setMostrarModal] = useState(false);
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
+  const [pending, setPending] = useState(true);
   const [isDelet, setIsDelet] = useState(false);
+  const [filterText, setFilterText] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const navigation = useNavigate();
   const initialRef = useRef(null);
@@ -63,9 +84,19 @@ const RegisterContainer = () => {
   const toast = useToast();
 
   useEffect(() => {
-    getData();
+    const timeout = setTimeout(() => {
+      getData();
+    }, 1000);
+    return () => clearTimeout(timeout);
   }, []);
 
+  const filteredData = filterText
+  ? data.filter((item) =>
+      item.Folio.toLowerCase().includes(filterText.toLowerCase())
+    )
+  : data;
+  console.log(filteredData, filterText.toLowerCase());
+  
   const showToast = (title, description, status) => {
     toast({
       title: title,
@@ -97,6 +128,7 @@ const RegisterContainer = () => {
     try {
       const datos = await ObtenerDataDB("Registros");
       setdata(datos);
+      setPending(false);
     } catch (error) {
       console.log(error);
     }
@@ -135,7 +167,8 @@ const RegisterContainer = () => {
   };
 
   const handleRegisterNewCostos = async () => {
-    const totalCargo = costos.cost1 + costos.cost2 + costos.cost3 + costos.cost4;
+    const totalCargo =
+      costos.cost1 + costos.cost2 + costos.cost3 + costos.cost4;
     const isValid = validateFormCostos();
     if (isValid) {
       const editElement = {
@@ -215,7 +248,7 @@ const RegisterContainer = () => {
     setCostos({
       ...costos,
       cost1: parseInt(row.Costos.Distancia),
-      cost4: row.Costos.TipoGrua
+      cost4: row.Costos.TipoGrua,
     });
     setForm(RegistroEdit);
     setMostrarModal(true);
@@ -285,8 +318,7 @@ const RegisterContainer = () => {
             "El registro ha sido liberado.",
             "success"
           );
-        }
-        else {
+        } else {
           return showToast(
             "Error de Liberación",
             "No puedes liberar un registro sin haber registrado costos anteriormente.",
@@ -394,11 +426,31 @@ const RegisterContainer = () => {
     {
       name: "Origen",
       selector: (row) => (
-        <Box>
-          <Text>Dirección: {row.Origen.Direccion}</Text>
-          <Text>Municipio: {row.Origen.Municipio}</Text>
-          <Text>Colonia: {row.Origen.Colonia}</Text>
-          <Text>CP: {row.Origen.CP}</Text>
+        <Box p={2}>
+          <Accordion allowMultiple>
+            <AccordionItem>
+              <h3>
+                <AccordionButton
+                  borderRadius="base"
+                  bg="blue.300"
+                  _hover={{ bg: "blue.400" }}
+                  _expanded={{ bg: "blue.400" }}
+                >
+                  <AccordionIcon color="white" />
+                  <Box as="span" flex="1" textAlign="left">
+                    <Text color="white" fontSize="sm">
+                      {row.Origen.Direccion}
+                    </Text>
+                  </Box>
+                </AccordionButton>
+              </h3>
+              <AccordionPanel pb={1} color="gray.700">
+                <Text>Municipio: {row.Origen.Municipio}</Text>
+                <Text>Colonia: {row.Origen.Colonia}</Text>
+                <Text>CP: {row.Origen.CP}</Text>
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
         </Box>
       ),
       sortable: true,
@@ -407,12 +459,32 @@ const RegisterContainer = () => {
       name: "Corralon Asignado",
       selector: (row) => (
         <Box>
-          <Text>Dirección: {row.CorralonAsignado.Direccion}</Text>
-          <Text>Nombre: {row.CorralonAsignado.Nombre}</Text>
-          <Text>Región: {row.CorralonAsignado.Region}</Text>
-          <Text>Contacto: {row.CorralonAsignado.Contacto}</Text>
-          <Text>Celular: {row.CorralonAsignado.Celular}</Text>
-          <Text>Distancia: {row.CorralonAsignado.Distancia}</Text>
+          <Accordion allowMultiple>
+            <AccordionItem>
+              <h3>
+                <AccordionButton
+                  borderRadius="base"
+                  bg="blue.300"
+                  _hover={{ bg: "blue.400" }}
+                  _expanded={{ bg: "blue.400" }}
+                >
+                  <AccordionIcon color="white" />
+                  <Box as="span" flex="1" textAlign="left">
+                    <Text color="white" fontSize="sm">
+                      {row.CorralonAsignado.Nombre}
+                    </Text>
+                  </Box>
+                </AccordionButton>
+              </h3>
+              <AccordionPanel pb={1} color="gray.700">
+                <Text>Dirección: {row.CorralonAsignado.Direccion}</Text>
+                <Text>Región: {row.CorralonAsignado.Region}</Text>
+                <Text>Contacto: {row.CorralonAsignado.Contacto}</Text>
+                <Text>Celular: {row.CorralonAsignado.Celular}</Text>
+                <Text>Distancia: {row.CorralonAsignado.Distancia}m</Text>
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
         </Box>
       ),
       sortable: true,
@@ -437,7 +509,7 @@ const RegisterContainer = () => {
                 w="full"
                 variant="ghost"
                 size="xs"
-                colorScheme="blue"
+                colorScheme="red"
               >
                 Registrar Liberación
               </Button>
@@ -449,42 +521,99 @@ const RegisterContainer = () => {
           </Box>
         ),
       sortable: true,
+      conditionalCellStyles: [
+        {
+          when: (row) => row.FechaSalida === "",
+          style: {
+            backgroundColor: "#FFF5F5",
+            color: "white",
+          },
+        },
+      ],
     },
     {
       name: "Costos",
       selector: (row) =>
         row.Costos.Estancia === "" ? (
           <Box>
-            <Text>Distancia: ${row.Costos.Distancia} pesos</Text>
-            <Text>Tipo Grua ({row.TipoGrua}): ${row.Costos.TipoGrua} pesos</Text>
-            <Box display="flex" gap="2">
-              <Text>Estancia: </Text>
-              <Badge colorScheme="red">Pendiente</Badge>
-            </Box>
-            <Box display="flex" gap="2">
-              <Text>Maniobras: </Text>
-              <Badge colorScheme="red">Pendiente</Badge>
-            </Box>
-            <Box w="full" mt="2">
-              <Button
-                onClick={() => handleClicRegisterCostos(row)}
-                leftIcon={<FiPlusCircle />}
-                w="full"
-                variant="ghost"
-                size="xs"
-                colorScheme="blue"
-              >
-                Registrar Costos
-              </Button>
-            </Box>
+            <Accordion allowMultiple>
+              <AccordionItem>
+                <h3>
+                  <AccordionButton
+                    borderRadius="base"
+                    bg="blue.300"
+                    _hover={{ bg: "blue.400" }}
+                    _expanded={{ bg: "blue.400" }}
+                  >
+                    <AccordionIcon color="white" />
+                    <Box as="span" flex="1" textAlign="left">
+                      <Text color="white" fontSize="sm">
+                        Resumen de costos
+                      </Text>
+                    </Box>
+                  </AccordionButton>
+                </h3>
+                <AccordionPanel pb={1} color="gray.700">
+                  <Text>Distancia: ${row.Costos.Distancia} pesos</Text>
+                  <Text>
+                    Tipo Grua ({row.TipoGrua}): ${row.Costos.TipoGrua} pesos
+                  </Text>
+                  <Box display="flex" gap="2">
+                    <Text>Estancia: </Text>
+                    <Badge colorScheme="red">Pendiente</Badge>
+                  </Box>
+                  <Box display="flex" gap="2">
+                    <Text>Maniobras: </Text>
+                    <Badge colorScheme="red">Pendiente</Badge>
+                  </Box>
+                  <Box w="full" mt="2">
+                    <Button
+                      onClick={() => handleClicRegisterCostos(row)}
+                      leftIcon={<FiPlusCircle />}
+                      w="full"
+                      variant="ghost"
+                      size="xs"
+                      colorScheme="red"
+                    >
+                      Registrar Costos
+                    </Button>
+                  </Box>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
           </Box>
         ) : (
           <Box>
-            <Text>Distancia: ${row.Costos.Distancia} pesos</Text>
-            <Text>Tipo Grua ({row.TipoGrua}): ${row.Costos.TipoGrua} pesos</Text>
-            <Text>Estancia: ${row.Costos.Estancia} pesos</Text>
-            <Text>Maniobras: ${row.Costos.Maniobras} pesos</Text>
-            <Text fontWeight="semibold">Total: ${row.Costos.Total} pesos</Text>
+            <Accordion allowMultiple>
+              <AccordionItem>
+                <h3>
+                  <AccordionButton
+                    borderRadius="base"
+                    bg="blue.300"
+                    _hover={{ bg: "blue.400" }}
+                    _expanded={{ bg: "blue.400" }}
+                  >
+                    <AccordionIcon color="white" />
+                    <Box as="span" flex="1" textAlign="left">
+                      <Text color="white" fontSize="sm">
+                        Resumen de costos
+                      </Text>
+                    </Box>
+                  </AccordionButton>
+                </h3>
+                <AccordionPanel pb={1} color="gray.700">
+                  <Text>Distancia: ${row.Costos.Distancia} pesos</Text>
+                  <Text>
+                    Tipo Grua ({row.TipoGrua}): ${row.Costos.TipoGrua} pesos
+                  </Text>
+                  <Text>Estancia: ${row.Costos.Estancia} pesos</Text>
+                  <Text>Maniobras: ${row.Costos.Maniobras} pesos</Text>
+                  <Text fontWeight="semibold">
+                    Total: ${row.Costos.Total} pesos
+                  </Text>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
           </Box>
         ),
       sortable: true,
@@ -548,8 +677,8 @@ const RegisterContainer = () => {
       <Box
         display="flex"
         flexDir={{ base: "column", md: "row" }}
-        gap={{base: "2", md:"0"}}
-        p={{ base: "2", md:"5"}}
+        gap={{ base: "2", md: "0" }}
+        p={{ base: "2", md: "5" }}
         justifyContent="space-between"
         alignItems="center"
       >
@@ -565,6 +694,45 @@ const RegisterContainer = () => {
           Nuevo Registro
         </Button>
       </Box>
+      <Box
+        h="auto"
+        display="flex"
+        flexDir={{ base: "column", md: "row" }}
+        justifyContent="flex-end"
+        alignItems="center"
+        width="full"
+        gap={1}
+        pr={{ base: "0", md: "3" }}
+      >
+        <Box onClick={() => setisFilter(!isFilter)} cursor="pointer" color="white" _hover={{ bg: "blue.300" }} p={{base: "1", md:"2"}} borderRadius="base" h="auto" bg="blue.400">Filtrar datos</Box>
+        {isFilter && (
+          <InputGroup w={{ base: "50%", md: "auto" }}>
+          <InputLeftElement>
+            <Icon as={MdSearch} boxSize="5" color="gray.400" />
+          </InputLeftElement>
+          <Input
+            w="full"
+            border="2px"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            borderColor="blue.300"
+            placeholder="Escriba un folio"
+          />
+          <InputRightElement>
+            {filterText && (
+              <Button
+                bg="blue.300"
+                _hover={{ bg: "blue.200" }}
+                color="white"
+                onClick={() => setFilterText("")}
+              >
+                x
+              </Button>
+            )}
+          </InputRightElement>
+        </InputGroup>
+        )}
+      </Box>
       <HStack
         display="flex"
         flexDir="column"
@@ -575,14 +743,15 @@ const RegisterContainer = () => {
         p="4"
       >
         <DataTable
-          data={data}
+          data={filteredData}
           columns={columns}
           highlightOnHover
           pointerOnHover
           pagination
           paginationPerPage={5}
-          striped
           responsive
+          progressPending={pending}
+          progressComponent={<CustomLoader />}
           selectableRowsHighlight
           customStyles={customStyles}
         />

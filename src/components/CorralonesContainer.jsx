@@ -59,6 +59,7 @@ import { useToast } from "@chakra-ui/react";
 import { MdSearch } from "react-icons/md";
 import MapaView from "./MapaView";
 import MapEdit from "./MapEdit";
+import CustomLoader from "./CustomLoader";
 
 const initailForm = {
   Nombre: "",
@@ -83,6 +84,9 @@ const CorralonesContainer = () => {
   const [Point, setPoint] = useState("");
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
+  const [isFilter, setisFilter] = useState(false)
+  const [filterText, setFilterText] = useState("");
+  const [pending, setPending] = useState(true);
   const [isDelet, setIsDelet] = useState(false);
   const initialRef = useRef(null);
   const finalRef = useRef(null);
@@ -99,7 +103,10 @@ const CorralonesContainer = () => {
   });
 
   useEffect(() => {
-    getData();
+    const timeout = setTimeout(() => {
+      getData();
+    }, 1000);
+    return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -124,6 +131,13 @@ const CorralonesContainer = () => {
     }
   }, [form.Direccion]);
 
+  const filteredData = filterText
+  ? data1.filter((item) =>
+      item.Nombre.toLowerCase().includes(filterText.toLowerCase())
+    )
+    : data1;
+  
+console.log(filteredData, filterText.toLowerCase());
   const showToast = (title, description, status) => {
     toast({
       title: title,
@@ -205,6 +219,7 @@ const CorralonesContainer = () => {
     try {
       const datos = await ObtenerDataDB("Corralones");
       setdata1(datos);
+      setPending(false);
     } catch (error) {
       console.log(error);
     }
@@ -493,6 +508,45 @@ const CorralonesContainer = () => {
           Nuevo Corralon
         </Button>
       </Box>
+      <Box
+        h="auto"
+        display="flex"
+        flexDir={{ base: "column", md: "row" }}
+        justifyContent="flex-end"
+        alignItems="center"
+        width="full"
+        gap={1}
+        pr={{ base: "0", md: "3" }}
+      >
+        <Box onClick={() => setisFilter(!isFilter)} cursor="pointer" color="white" _hover={{ bg: "blue.300" }} p={{base: "1", md:"2"}} borderRadius="base" h="auto" bg="blue.400">Filtrar datos</Box>
+        {isFilter && (
+          <InputGroup w={{ base: "50%", md: "auto" }}>
+          <InputLeftElement>
+            <Icon as={MdSearch} boxSize="5" color="gray.400" />
+          </InputLeftElement>
+          <Input
+            w="full"
+            border="2px"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            borderColor="blue.300"
+            placeholder="Nombre de corralón"
+          />
+          <InputRightElement>
+            {filterText && (
+              <Button
+                bg="blue.300"
+                _hover={{ bg: "blue.200" }}
+                color="white"
+                onClick={() => setFilterText("")}
+              >
+                x
+              </Button>
+            )}
+          </InputRightElement>
+        </InputGroup>
+        )}
+      </Box>
       <HStack
         display="flex"
         flexDir="column"
@@ -503,14 +557,15 @@ const CorralonesContainer = () => {
         p="4"
       >
         <DataTable
-          data={data1}
+          data={filteredData}
           columns={columnsPermission}
           highlightOnHover
           pointerOnHover
           pagination
           paginationPerPage={5}
-          striped
           responsive
+          progressPending={pending}
+          progressComponent={<CustomLoader/>}
           selectableRowsHighlight
           customStyles={customStyles}
         />

@@ -37,7 +37,7 @@ const HomePage = () => {
                     <MdSupervisedUserCircle size="30px" />
                   </Box>
                   <Box display="flex" flexDir="column" gap="2" p="2">
-                    <Text fontSize="sm" fontWeight="light">
+                    <Text fontSize="sm" textAlign="center" p="2" fontWeight="light">
                       Gestion de datos de los usuarios del sistema
                     </Text>
                     <Button
@@ -72,8 +72,8 @@ const HomePage = () => {
                     <FiFileText size="30" />
                   </Box>
                   <Box display="flex" flexDir="column" gap="2" p="2">
-                    <Text fontSize="sm" fontWeight="light">
-                      Gestion de Registros de servicios de arrrastre de gruas
+                    <Text fontSize="sm" textAlign="center" p="2" fontWeight="light">
+                      Administración de registros, cotización y liberación 
                     </Text>
                     <Button
                       onClick={() => navigation("/Registros")}
@@ -107,8 +107,8 @@ const HomePage = () => {
                     <FiTruck size="30" />
                   </Box>
                   <Box display="flex" flexDir="column" gap="2" p="2">
-                    <Text fontSize="sm" fontWeight="light">
-                      Gestión de cada uno de los corralones en Puebla
+                    <Text fontSize="sm"  textAlign="center" p="2" fontWeight="light">
+                      Gestión de cada uno de los corralones por región
                     </Text>
                     <Button
                       onClick={() => navigation("/Corralones")}
@@ -180,8 +180,8 @@ const HomePage = () => {
                     <FiFileText size="30" />
                   </Box>
                   <Box display="flex" flexDir="column" gap="2" p="2">
-                    <Text fontSize="sm" fontWeight="light">
-                      Gestion de Registros de servicios de arrrastre de gruas
+                    <Text fontSize="sm" textAlign="center" p="2" fontWeight="light">
+                    Administración de registros, cotización y liberación 
                     </Text>
                     <Button
                       onClick={() => navigation("/Registros")}
@@ -215,7 +215,7 @@ const HomePage = () => {
                     <MdCarRepair size="30" />
                   </Box>
                   <Box display="flex" flexDir="column" gap="2" p="2">
-                    <Text fontSize="sm" fontWeight="light">
+                    <Text fontSize="sm" textAlign="center" p="2" fontWeight="light">
                       Trazado de rutas, corralon mas cercano, cotización de costos
                     </Text>
                     <Button
