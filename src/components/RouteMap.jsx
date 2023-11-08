@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 import { useEffect } from "react";
-
+import { Icon } from "leaflet";
 import L from "leaflet"; // Importa la librería Leaflet para trabajar con mapas interactivos.
 import "leaflet-routing-machine"; // Importa la extensión de Leaflet para enrutamiento.
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css"; // Importa los estilos CSS para la extensión de enrutamiento.
 import { useMap } from "react-leaflet"; // Importa la función useMap de la librería react-leaflet.
-import startIcon from "../assets/marker1.jpg"; // Importa el icono de punto de inicio.
-import endIcon from "../assets/marker1.jpg";
+import startIcon from "../assets/marker4.png"; // Importa el icono de punto de inicio.
+import endIcon from "../assets/marker3.png";
 
 const RouteMap = ({ locationUser, closestDirection, setDistance }) => {
   const map = useMap(); // Obtiene el objeto de mapa actual utilizando useMap de react-leaflet.
@@ -21,7 +21,7 @@ const RouteMap = ({ locationUser, closestDirection, setDistance }) => {
       waypoints: [
         {
           latLng: L.latLng(locationUser.displayLatLng),
-          icon: L.icon({
+          icon: new Icon({
             iconUrl: startIcon,
             iconSize: [32, 32],
           }),
@@ -31,7 +31,7 @@ const RouteMap = ({ locationUser, closestDirection, setDistance }) => {
             closestDirection[0].Coordenadas.Latitud,
             closestDirection[0].Coordenadas.Longitud
           ),
-          icon: L.icon({
+          icon: new Icon({
             iconUrl: endIcon,
             iconSize: [32, 32], // Tamaño del icono de punto de inicio.
           }),
@@ -52,9 +52,9 @@ const RouteMap = ({ locationUser, closestDirection, setDistance }) => {
       console.log(routes);
       if (routes.length > 0) {
         const route = routes[0];
-        const { totalDistance, totalTime } = route.summary;
-        console.log(`Distancia: ${totalDistance} metros`);
-        console.log(`Tiempo estimado: ${totalTime} segundos`);
+        const { totalDistance } = route.summary;
+        // console.log(`Distancia: ${totalDistance} metros`);
+        // console.log(`Tiempo estimado: ${totalTime} segundos`);
         setDistance(totalDistance);
       }
     });

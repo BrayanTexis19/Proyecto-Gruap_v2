@@ -40,7 +40,13 @@ import marker from "../assets/gruapp_rc_2.svg";
 import logo from "../assets/gruapp.jpg";
 import { Icon } from "@chakra-ui/react";
 import { MdPerson, MdSearch, MdSecurity } from "react-icons/md";
-import { FaCar, FaMapMarkedAlt, FaMapMarker, FaMapMarkerAlt, FaPiggyBank } from "react-icons/fa";
+import {
+  FaCar,
+  FaMapMarkedAlt,
+  FaMapMarker,
+  FaMapMarkerAlt,
+  FaPiggyBank,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getRegisterInfo, userExists } from "../firebase/firebase";
 import { useState, useEffect } from "react";
@@ -359,7 +365,7 @@ const LoginContainer = () => {
             <DrawerContent>
               <DrawerCloseButton color="white" />
               <DrawerHeader bg="blue.500" color="white">
-                <Heading textAlign="center">Detalles</Heading>
+                <Heading textAlign="center">Detalles de Registro</Heading>
               </DrawerHeader>
               <DrawerBody>
                 <Box
@@ -457,7 +463,12 @@ const LoginContainer = () => {
                             <AccordionIcon color="white" />
                           </AccordionButton>
                         </h2>
-                        <AccordionPanel  boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
+                        <AccordionPanel
+                          boxShadow="lg"
+                          border="1px"
+                          borderColor="gray.200"
+                          pb={4}
+                        >
                           <Box display="flex" flexDir="column" gap="1" w="full">
                             <Box
                               w="full"
@@ -475,7 +486,7 @@ const LoginContainer = () => {
                               flexDir={{ base: "column", md: "row" }}
                               gap="2"
                               justifyContent="flex-start"
-                              alignItems={{base: "start" ,md:"center"}}
+                              alignItems={{ base: "start", md: "center" }}
                             >
                               <Badge>Descripcion:</Badge>
                               <Text>
@@ -519,12 +530,17 @@ const LoginContainer = () => {
                             <AccordionIcon color="white" />
                           </AccordionButton>
                         </h2>
-                        <AccordionPanel  boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
-                        <Box
+                        <AccordionPanel
+                          boxShadow="lg"
+                          border="1px"
+                          borderColor="gray.200"
+                          pb={4}
+                        >
+                          <Box
                             w="full"
                             display="flex"
                             flexDir={{ base: "column", md: "row" }}
-                            alignItems={{base: "start" ,md:"center"}}
+                            alignItems={{ base: "start", md: "center" }}
                             gap="2"
                             justifyContent="flex-start"
                           >
@@ -538,7 +554,7 @@ const LoginContainer = () => {
                             w="full"
                             justifyContent="center"
                             alignItems="center"
-                            mt={{ base: "1",md:"3"}}
+                            mt={{ base: "1", md: "3" }}
                           >
                             <Box
                               w="full"
@@ -597,7 +613,11 @@ const LoginContainer = () => {
                                 <Text>{folioData.Origen.Longitud}</Text>
                               </Box>
                             </Box>
-                            <Box w="full" h={{base: "25vh", md: "50vh"}} borderRadius="lg">
+                            <Box
+                              w="full"
+                              h={{ base: "25vh", md: "50vh" }}
+                              borderRadius="lg"
+                            >
                               <MapViewFolio
                                 latitud={folioData.Origen.Latitud}
                                 longitud={folioData.Origen.Longitud}
@@ -630,12 +650,17 @@ const LoginContainer = () => {
                             <AccordionIcon color="white" />
                           </AccordionButton>
                         </h2>
-                        <AccordionPanel  boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
-                        <Box
+                        <AccordionPanel
+                          boxShadow="lg"
+                          border="1px"
+                          borderColor="gray.200"
+                          pb={4}
+                        >
+                          <Box
                             w="full"
                             display="flex"
                             flexDir={{ base: "column", md: "row" }}
-                            alignItems={{base: "start" ,md:"center"}}
+                            alignItems={{ base: "start", md: "center" }}
                             gap="2"
                             justifyContent="flex-start"
                           >
@@ -645,7 +670,7 @@ const LoginContainer = () => {
                           <Box
                             display="flex"
                             flexDir={{ base: "column", md: "row" }}
-                            alignItems={{base: "start" ,md:"center"}}
+                            alignItems={{ base: "start", md: "center" }}
                             gap="1"
                             w="full"
                             justifyContent="center"
@@ -738,7 +763,11 @@ const LoginContainer = () => {
                                 </Text>
                               </Box>
                             </Box>
-                            <Box w="full" h={{ base:"10vh", md:"50vh"}} borderRadius="lg">
+                            <Box
+                              w="full"
+                              h={{ base: "25vh", md: "50vh" }}
+                              borderRadius="lg"
+                            >
                               <MapViewFolio
                                 latitud={folioData.CorralonAsignado.Latitud}
                                 longitud={folioData.CorralonAsignado.Longitud}
@@ -771,8 +800,13 @@ const LoginContainer = () => {
                             <AccordionIcon color="white" />
                           </AccordionButton>
                         </h2>
-                        <AccordionPanel boxShadow="lg" border="1px" borderColor="gray.200" pb={4}>
-                          <Box px={{base: "0", md:"8"}}>
+                        <AccordionPanel
+                          boxShadow="lg"
+                          border="1px"
+                          borderColor="gray.200"
+                          pb={4}
+                        >
+                          <Box px={{ base: "0", md: "8" }}>
                             <Box>
                               <Text
                                 textAlign="center"
@@ -800,11 +834,29 @@ const LoginContainer = () => {
                               alignItems="center"
                             >
                               <Badge colorScheme="blue">
-                                Cobro por Estancia:
+                                Cobro por Tipo Grua ({folioData.TipoGrua}):
                               </Badge>
                               <Text fontWeight="light">
-                                ${folioData.Costos.Estancia} pesos
+                                ${folioData.Costos.TipoGrua} pesos
                               </Text>
+                            </Box>
+                            <Box
+                              display="flex"
+                              justifyContent="space-evenly"
+                              alignItems="center"
+                            >
+                              <Badge colorScheme="blue">
+                                Cobro por Estancia:
+                              </Badge>
+                              {folioData.Costos.Estancia === "" ? (
+                                <Text color="red" fontWeight="semibold">
+                                  Pendiente
+                                </Text>
+                              ) : (
+                                <Text fontWeight="light">
+                                  ${folioData.Costos.Estancia} pesos
+                                </Text>
+                              )}
                             </Box>
                             <Box
                               display="flex"
@@ -814,14 +866,26 @@ const LoginContainer = () => {
                               <Badge colorScheme="blue">
                                 Cobro por Maniobra:
                               </Badge>
-                              <Text fontWeight="light">
-                                ${folioData.Costos.Maniobras} pesos
-                              </Text>
+                              {folioData.Costos.Maniobras === "" ? (
+                                <Text color="red" fontWeight="semibold">
+                                  Pendiente
+                                </Text>
+                              ) : (
+                                <Text fontWeight="light">
+                                  ${folioData.Costos.Maniobras} pesos
+                                </Text>
+                              )}
                             </Box>
                             <Box>
-                              <Text pt="2" textAlign="end">
+                            {folioData.Costos.Estancia === "" ? (
+                                <Text color="red" pt="2" textAlign="end" fontWeight="semibold">
+                                  Total: Pendiente
+                                </Text>
+                              ) : (
+                                <Text pt="2" fontWeight="semibold" textAlign="end">
                                 Total: ${folioData.Costos.Total} pesos
                               </Text>
+                              )}
                             </Box>
                           </Box>
                         </AccordionPanel>

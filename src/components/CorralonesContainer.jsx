@@ -58,16 +58,17 @@ import { v4 as uuid } from "uuid";
 import { useToast } from "@chakra-ui/react";
 import { MdSearch } from "react-icons/md";
 import MapaView from "./MapaView";
+import MapEdit from "./MapEdit";
 
 const initailForm = {
   Nombre: "",
-  Region: "1",
+  Region: "",
   Rol: "Lunes",
   Contacto: "",
   Celular: "",
   Direccion: "",
-  Latitud: "",
-  Longitud: "",
+  Latitud: null,
+  Longitud: null,
   Status: "Activo",
 };
 
@@ -77,7 +78,9 @@ const CorralonesContainer = () => {
   const [suggestions, setSuggestions] = useState([]); //Arreglo de Sugerencias de direcciones
   const [data1, setdata1] = useState([]);
   const [form, setForm] = useState(initailForm);
+  const [markerPoint, setmarkerPoint] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const [Point, setPoint] = useState("");
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
   const [isDelet, setIsDelet] = useState(false);
@@ -132,6 +135,11 @@ const CorralonesContainer = () => {
     });
   };
 
+  const handleSetPoint = (point) => {
+    console.log(point);
+    setPoint(point);
+  };
+
   const handleClickOutside = (event) => {
     const { current: wrap } = wrapperRef;
     if (wrap && !wrap.contains(event.target)) {
@@ -142,10 +150,15 @@ const CorralonesContainer = () => {
   const updateDirection = async (direction) => {
     form.Direccion = direction;
     const { lat, lng } = await handleClickDirection(direction);
+    const markPoint = {
+      Latitud: lat,
+      Longitud: lng,
+    };
+    setmarkerPoint(markPoint);
     setForm({
       ...form,
-      Latitud: lat.toString(),
-      Longitud: lng.toString(),
+      Latitud: lat,
+      Longitud: lng,
     });
   };
 
@@ -184,6 +197,7 @@ const CorralonesContainer = () => {
       Latitud: "",
       Longitud: "",
     });
+    setmarkerPoint(null);
     setSuggestions([]);
   };
 
@@ -226,6 +240,9 @@ const CorralonesContainer = () => {
     if (!form.Celular.trim()) {
       errors.Celular = "El campo Celular es obligatorio";
     }
+    if (!Point.trim()) {
+      errors.Region = "El campo Región es obligatorio";
+    }
 
     setValidationErrors(errors);
 
@@ -237,12 +254,12 @@ const CorralonesContainer = () => {
       const newElement = {
         id: uuid(),
         Nombre: form.Nombre,
-        Region: form.Region,
+        Region: Point,
         Rol: form.Rol,
         Direccion: form.Direccion,
         Coordenadas: {
-          Latitud: form.Latitud.toString(),
-          Longitud: form.Longitud.toString(),
+          Latitud: form.Latitud,
+          Longitud: form.Longitud,
         },
         Contacto: form.Contacto,
         Celular: form.Celular,
@@ -284,6 +301,13 @@ const CorralonesContainer = () => {
       Longitud: row.Coordenadas.Longitud,
       Status: row.Status,
     };
+    setPoint(row.Region);
+    const coordenadas = {
+      Latitud: row.Coordenadas.Latitud,
+      Longitud: row.Coordenadas.Longitud,
+    }
+    console.log(coordenadas)
+    setmarkerPoint(coordenadas);
     setForm(userEdit);
     onOpen();
   };
@@ -318,7 +342,7 @@ const CorralonesContainer = () => {
       const editElement = {
         id: user.id,
         Nombre: form.Nombre,
-        Region: form.Region,
+        Region: Point,
         Rol: form.Rol,
         Direccion: form.Direccion,
         Coordenadas: {
@@ -336,12 +360,18 @@ const CorralonesContainer = () => {
       getData();
       onClose();
     } else {
-      showToast("Error de validación", "Por favor, corrige los errores en el formulario.", "error");
+      showToast(
+        "Error de validación",
+        "Por favor, corrige los errores en el formulario.",
+        "error"
+      );
     }
   };
 
   const handleClicOnClose = () => {
     setForm(initailForm);
+    setPoint("");
+    setmarkerPoint(null);
     setValidationErrors({});
     onClose();
   };
@@ -446,8 +476,8 @@ const CorralonesContainer = () => {
       <Box
         display="flex"
         flexDir={{ base: "column", md: "row" }}
-        gap={{base: "2", md:"0"}}
-        p={{ base: "2", md:"5"}}
+        gap={{ base: "2", md: "0" }}
+        p={{ base: "2", md: "5" }}
         justifyContent="space-between"
         alignItems="center"
       >
@@ -499,6 +529,12 @@ const CorralonesContainer = () => {
           </ModalHeader>
           <ModalCloseButton color="white" />
           <ModalBody pb={6}>
+            <Box w="100%" h="40vh" mb="3">
+              <MapEdit
+                handleSetPoint={handleSetPoint}
+                markerPoint={markerPoint}
+              />
+            </Box>
             <Box display="flex" gap="3">
               <FormControl isRequired isInvalid={!!validationErrors.Nombre}>
                 <FormLabel>Nombre:</FormLabel>
@@ -519,7 +555,6 @@ const CorralonesContainer = () => {
                   name="Status"
                   value={form.Status}
                   onChange={handleChange}
-                  ref={initialRef}
                 >
                   <option value="Activo">Activo</option>
                   <option value="Inactivo">Inactivo</option>
@@ -539,19 +574,21 @@ const CorralonesContainer = () => {
                 </Select>
               </FormControl>
 
-              <FormControl mt={3}>
+              <FormControl
+                mt={3}
+                isRequired
+                isInvalid={!!validationErrors.Region}
+              >
                 <FormLabel>Región:</FormLabel>
-                <Select
+                <Input
                   name="Region"
-                  value={form.Region}
-                  onChange={handleChange}
-                >
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </Select>
+                  value={Point}
+                  isReadOnly
+                  placeholder="selecciona del mapa"
+                />
+                {validationErrors.Region && (
+                  <FormErrorMessage>{validationErrors.Region}</FormErrorMessage>
+                )}
               </FormControl>
             </Box>
             <Box display="flex" gap="3">
@@ -608,7 +645,10 @@ const CorralonesContainer = () => {
                 Dirección:
               </Text>
               <Box position="relative" width="full" zIndex={2}>
-                <FormControl isRequired isInvalid={!!validationErrors.Direccion}>
+                <FormControl
+                  isRequired
+                  isInvalid={!!validationErrors.Direccion}
+                >
                   <InputGroup w="auto">
                     <InputLeftElement>
                       <Icon as={MdSearch} boxSize="5" color="gray.400" />
@@ -641,10 +681,10 @@ const CorralonesContainer = () => {
                     </InputRightElement>
                   </InputGroup>
                   {validationErrors.Direccion && (
-                  <FormErrorMessage>
-                    {validationErrors.Direccion}
-                  </FormErrorMessage>
-                )}
+                    <FormErrorMessage>
+                      {validationErrors.Direccion}
+                    </FormErrorMessage>
+                  )}
                 </FormControl>
                 {display && (
                   <Box

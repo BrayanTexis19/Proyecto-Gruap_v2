@@ -65,9 +65,15 @@ const TrazadoPage = () => {
     count: steps.length,
   });
   const navigate = useNavigate();
-
+  const GruasCost = {
+    A: 300,
+    B: 350,
+    C: 370,
+    D: 400,
+  }
   const handleClicNewRegister = async () => {
     const CostoDistancia = parseInt(distance) * .15
+    const CostoGrua = GruasCost[form.TipoGrua];
     const result = await RecordCount("Registros");
     const formattedNumber = (result + 1).toString().padStart(4, "0");
     const NewElement = {
@@ -103,6 +109,7 @@ const TrazadoPage = () => {
         Distancia: CostoDistancia.toFixed(2),
         Estancia: "",
         Maniobras: "",
+        TipoGrua: CostoGrua.toFixed(2)
       },
       Status: "0",
     };

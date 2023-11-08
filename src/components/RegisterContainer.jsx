@@ -51,7 +51,7 @@ const RegisterContainer = () => {
   const [data, setdata] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [Registro, setRegistro] = useState(null);
-  const [costos, setCostos] = useState({ cost1: 0, cost2: 0, cost3: 0 });
+  const [costos, setCostos] = useState({ cost1: 0, cost2: 0, cost3: 0, cost4: 0});
   const [mostrarModal, setMostrarModal] = useState(false);
   const [messageAction, setmessageAction] = useState("");
   const [user, setUser] = useState(null);
@@ -135,7 +135,7 @@ const RegisterContainer = () => {
   };
 
   const handleRegisterNewCostos = async () => {
-    const totalCargo = costos.cost1 + costos.cost2 + costos.cost3;
+    const totalCargo = costos.cost1 + costos.cost2 + costos.cost3 + costos.cost4;
     const isValid = validateFormCostos();
     if (isValid) {
       const editElement = {
@@ -170,6 +170,7 @@ const RegisterContainer = () => {
         },
         Costos: {
           Distancia: costos.cost1.toFixed(2),
+          TipoGrua: costos.cost4,
           Estancia: costos.cost2.toFixed(2),
           Maniobras: costos.cost3.toFixed(2),
           Total: totalCargo.toFixed(2),
@@ -214,6 +215,7 @@ const RegisterContainer = () => {
     setCostos({
       ...costos,
       cost1: parseInt(row.Costos.Distancia),
+      cost4: row.Costos.TipoGrua
     });
     setForm(RegistroEdit);
     setMostrarModal(true);
@@ -454,6 +456,7 @@ const RegisterContainer = () => {
         row.Costos.Estancia === "" ? (
           <Box>
             <Text>Distancia: ${row.Costos.Distancia} pesos</Text>
+            <Text>Tipo Grua ({row.TipoGrua}): ${row.Costos.TipoGrua} pesos</Text>
             <Box display="flex" gap="2">
               <Text>Estancia: </Text>
               <Badge colorScheme="red">Pendiente</Badge>
@@ -478,6 +481,7 @@ const RegisterContainer = () => {
         ) : (
           <Box>
             <Text>Distancia: ${row.Costos.Distancia} pesos</Text>
+            <Text>Tipo Grua ({row.TipoGrua}): ${row.Costos.TipoGrua} pesos</Text>
             <Text>Estancia: ${row.Costos.Estancia} pesos</Text>
             <Text>Maniobras: ${row.Costos.Maniobras} pesos</Text>
             <Text fontWeight="semibold">Total: ${row.Costos.Total} pesos</Text>
@@ -677,6 +681,16 @@ const RegisterContainer = () => {
                       Cobro por Distancia:
                     </Badge>
                     <Text fontWeight="light">${costos.cost1} pesos</Text>
+                  </Box>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Badge fontWeight="medium" colorScheme="blue">
+                      Cobro por Tipo Grua:
+                    </Badge>
+                    <Text fontWeight="light">${costos.cost4} pesos</Text>
                   </Box>
                   <Box
                     display="flex"
