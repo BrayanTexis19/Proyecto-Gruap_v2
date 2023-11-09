@@ -167,8 +167,9 @@ const RegisterContainer = () => {
   };
 
   const handleRegisterNewCostos = async () => {
+    console.log(costos)
     const totalCargo =
-      costos.cost1 + costos.cost2 + costos.cost3 + costos.cost4;
+      (parseFloat(costos.cost1) + parseFloat(costos.cost2) + parseFloat(costos.cost3) + parseFloat(costos.cost4)).toFixed(2);
     const isValid = validateFormCostos();
     if (isValid) {
       const editElement = {
@@ -202,11 +203,11 @@ const RegisterContainer = () => {
           Longitud: Registro.CorralonAsignado.Longitud,
         },
         Costos: {
-          Distancia: costos.cost1.toFixed(2),
+          Distancia: costos.cost1,
           TipoGrua: costos.cost4,
-          Estancia: costos.cost2.toFixed(2),
-          Maniobras: costos.cost3.toFixed(2),
-          Total: totalCargo.toFixed(2),
+          Estancia: costos.cost2,
+          Maniobras: costos.cost3,
+          Total: totalCargo,
         },
         Status: "1",
       };
@@ -238,7 +239,6 @@ const RegisterContainer = () => {
 
   const handleClicRegisterCostos = (row) => {
     setRegistro(row);
-    console.log(row);
     setmessageAction("Registrar Costos");
     const RegistroEdit = {
       Distancia: row.CorralonAsignado.Distancia,
@@ -248,7 +248,7 @@ const RegisterContainer = () => {
     setCostos({
       ...costos,
       cost1: parseInt(row.Costos.Distancia),
-      cost4: row.Costos.TipoGrua,
+      cost4: parseInt(row.Costos.TipoGrua),
     });
     setForm(RegistroEdit);
     setMostrarModal(true);
@@ -373,14 +373,14 @@ const RegisterContainer = () => {
       if (e.target.value === "") return setCostos({ ...costos, cost2: 0 });
       setCostos({
         ...costos,
-        cost2: parseInt(e.target.value) * 40,
+        cost2: (parseInt(e.target.value) * 40).toFixed(2),
       });
     }
     if (e.target.name === "Maniobras") {
       if (e.target.value === "") return setCostos({ ...costos, cost3: 0 });
       setCostos({
         ...costos,
-        cost3: parseInt(e.target.value) * 50,
+        cost3: (parseInt(e.target.value) * 50).toFixed(2),
       });
     }
   };
