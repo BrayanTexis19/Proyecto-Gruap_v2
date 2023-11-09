@@ -247,8 +247,8 @@ const RegisterContainer = () => {
     };
     setCostos({
       ...costos,
-      cost1: parseFloat(row.Costos.Distancia),
-      cost4: parseFloat(row.Costos.TipoGrua),
+      cost1: parseFloat(row.Costos.Distancia).toFixed(2),
+      cost4: parseFloat(row.Costos.TipoGrua).toFixed(2),
     });
     setForm(RegistroEdit);
     setMostrarModal(true);
