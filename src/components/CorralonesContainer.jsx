@@ -286,7 +286,8 @@ console.log(filteredData, filterText.toLowerCase());
       setForm(initailForm);
       getData();
       onClose();
-
+      setPoint("");
+      setmarkerPoint(null);
       showToast(
         "Corralon Registrado",
         "El corralon ha sido registrado.",
@@ -372,6 +373,8 @@ console.log(filteredData, filterText.toLowerCase());
       const res = await UpdateElement("Corralones", user.docId, editElement);
       console.log(JSON.stringify(res));
       setForm(initailForm);
+      setPoint("");
+      setmarkerPoint(null);
       getData();
       onClose();
     } else {
