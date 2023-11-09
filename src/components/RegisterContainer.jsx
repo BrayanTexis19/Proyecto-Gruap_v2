@@ -247,8 +247,8 @@ const RegisterContainer = () => {
     };
     setCostos({
       ...costos,
-      cost1: parseInt(row.Costos.Distancia),
-      cost4: parseInt(row.Costos.TipoGrua),
+      cost1: parseFloat(row.Costos.Distancia),
+      cost4: parseFloat(row.Costos.TipoGrua),
     });
     setForm(RegistroEdit);
     setMostrarModal(true);
@@ -373,14 +373,14 @@ const RegisterContainer = () => {
       if (e.target.value === "") return setCostos({ ...costos, cost2: 0 });
       setCostos({
         ...costos,
-        cost2: (parseInt(e.target.value) * 40).toFixed(2),
+        cost2: (parseFloat(e.target.value) * 40).toFixed(2),
       });
     }
     if (e.target.name === "Maniobras") {
       if (e.target.value === "") return setCostos({ ...costos, cost3: 0 });
       setCostos({
         ...costos,
-        cost3: (parseInt(e.target.value) * 50).toFixed(2),
+        cost3: (parseFloat(e.target.value) * 50).toFixed(2),
       });
     }
   };
